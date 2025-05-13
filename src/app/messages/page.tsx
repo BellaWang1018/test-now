@@ -194,149 +194,163 @@ export default function MessageInbox() {
 
   if (!mounted || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-lg font-semibold">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Messages</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Conversations List */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b">
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              className="w-full px-4 py-2 border rounded-lg"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          
-          <div className="divide-y">
-            {filteredConversations.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <p className="text-lg font-medium mb-2">No conversations found</p>
-                <p className="text-sm">Start a new conversation or try a different search term</p>
-              </div>
-            ) : (
-              filteredConversations.map((conversation) => (
-                <div
-                  key={conversation.id}
-                  className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                    activeConversation === conversation.id ? 'bg-blue-50' : ''
-                  }`}
-                  onClick={() => {
-                    setActiveConversation(conversation.id);
-                    const token = localStorage.getItem('auth_token');
-                    if (token) {
-                      fetchMessages(token, conversation.id);
-                    }
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="relative w-10 h-10 mr-3">
-                        <Image
-                          src={conversation.avatar}
-                          alt={conversation.name}
-                          fill
-                          className="rounded-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{conversation.name}</h3>
-                        <p className="text-sm text-gray-500">{conversation.lastMessage}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm text-gray-500">{conversation.timestamp}</span>
-                      {conversation.unread > 0 && (
-                        <span className="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                          {conversation.unread}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
         </div>
-        
-        {/* Messages */}
-        <div className="md:col-span-2 bg-white rounded-lg shadow">
-          {activeConversation ? (
-            <>
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-medium">
-                  {conversations.find(c => c.id === activeConversation)?.name}
-                </h2>
-              </div>
-              
-              <div className="p-4 h-[calc(100vh-300px)] overflow-y-auto">
-                {getConversationMessages(activeConversation).length === 0 ? (
-                  <div className="text-center text-gray-500">
-                    <p className="text-lg font-medium mb-2">No messages yet</p>
-                    <p className="text-sm">Start the conversation by sending a message</p>
-                  </div>
-                ) : (
-                  getConversationMessages(activeConversation).slice().reverse().map((message) => (
-                    <div
-                      key={message.id}
-                      className={`mb-4 ${
-                        message.sender_id === user?.id ? 'text-right' : 'text-left'
-                      }`}
-                    >
-                      <div
-                        className={`inline-block p-3 rounded-lg ${
-                          message.sender_id === user?.id
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-100'
-                        }`}
-                      >
-                        {message.content}
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(message.created_at).toLocaleTimeString()}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
-              
-              <div className="p-4 border-t">
-                <div className="flex">
-                  <input
-                    type="text"
-                    placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 border rounded-l-lg focus:outline-none"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handleSendMessage();
+      
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Conversations List */}
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-200">
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <div className="divide-y divide-gray-200">
+              {filteredConversations.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No conversations found</h3>
+                  <p className="mt-1 text-sm text-gray-500">Start a new conversation or try a different search term</p>
+                </div>
+              ) : (
+                filteredConversations.map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    className={`p-4 cursor-pointer hover:bg-gray-50 ${
+                      activeConversation === conversation.id ? 'bg-blue-50' : ''
+                    }`}
+                    onClick={() => {
+                      setActiveConversation(conversation.id);
+                      const token = localStorage.getItem('auth_token');
+                      if (token) {
+                        fetchMessages(token, conversation.id);
                       }
                     }}
-                  />
-                  <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600"
-                    onClick={handleSendMessage}
                   >
-                    Send
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="p-8 text-center text-gray-500">
-              Select a conversation to start messaging
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="relative w-10 h-10 mr-3">
+                          <Image
+                            src={conversation.avatar}
+                            alt={conversation.name}
+                            fill
+                            className="rounded-full object-cover"
+                          />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">{conversation.name}</h3>
+                          <p className="text-sm text-gray-500">{conversation.lastMessage}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm text-gray-500">{conversation.timestamp}</span>
+                        {conversation.unread > 0 && (
+                          <span className="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                            {conversation.unread}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-          )}
+          </div>
+          
+          {/* Messages */}
+          <div className="md:col-span-2 bg-white shadow rounded-lg overflow-hidden">
+            {activeConversation ? (
+              <>
+                <div className="p-4 border-b border-gray-200">
+                  <h2 className="text-lg font-medium text-gray-900">
+                    {conversations.find(c => c.id === activeConversation)?.name}
+                  </h2>
+                </div>
+                
+                <div className="p-4 h-[calc(100vh-300px)] overflow-y-auto">
+                  {getConversationMessages(activeConversation).length === 0 ? (
+                    <div className="text-center text-gray-500">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">No messages yet</h3>
+                      <p className="mt-1 text-sm text-gray-500">Start the conversation by sending a message</p>
+                    </div>
+                  ) : (
+                    getConversationMessages(activeConversation).slice().reverse().map((message) => (
+                      <div
+                        key={message.id}
+                        className={`mb-4 ${
+                          message.sender_id === user?.id ? 'text-right' : 'text-left'
+                        }`}
+                      >
+                        <div
+                          className={`inline-block p-3 rounded-lg ${
+                            message.sender_id === user?.id
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-100 text-gray-900'
+                          }`}
+                        >
+                          {message.content}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(message.created_at).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                <div className="p-4 border-t border-gray-200">
+                  <div className="flex">
+                    <input
+                      type="text"
+                      placeholder="Type a message..."
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSendMessage();
+                        }
+                      }}
+                    />
+                    <button
+                      className="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      onClick={handleSendMessage}
+                    >
+                      Send
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="p-8 text-center text-gray-500">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Select a conversation</h3>
+                <p className="mt-1 text-sm text-gray-500">Choose a conversation to start messaging</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -86,13 +86,13 @@ export default function CompanyApplications() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Applications</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
           <Link
             href="/company/dashboard/internships/new"
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Post New Internship
           </Link>
@@ -104,11 +104,11 @@ export default function CompanyApplications() {
           </div>
         )}
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
           {applications.length > 0 ? (
             <div className="divide-y divide-gray-200">
               {applications.map((application) => (
-                <div key={application.id} className="p-6 hover:bg-gray-50">
+                <div key={application.id} className="p-6 hover:bg-gray-50 transition duration-150">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-3">

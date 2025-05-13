@@ -171,18 +171,18 @@ export default function CompanyDashboard() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
             <p className="mt-1 text-sm text-gray-500">
               Welcome back, {user?.company_name}
             </p>
           </div>
           <Link
             href="/company/dashboard/internships/new"
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Post New Internship
           </Link>
@@ -196,20 +196,20 @@ export default function CompanyDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-sm text-gray-500">Total Internships</h3>
+          <div className="bg-white overflow-hidden shadow rounded-lg p-6">
+            <h3 className="text-sm font-medium text-gray-500">Total Internships</h3>
             <p className="text-2xl font-bold">{stats.total_internships}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-sm text-gray-500">Active Internships</h3>
+          <div className="bg-white overflow-hidden shadow rounded-lg p-6">
+            <h3 className="text-sm font-medium text-gray-500">Active Internships</h3>
             <p className="text-2xl font-bold">{stats.active_internships}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-sm text-gray-500">Total Applications</h3>
+          <div className="bg-white overflow-hidden shadow rounded-lg p-6">
+            <h3 className="text-sm font-medium text-gray-500">Total Applications</h3>
             <p className="text-2xl font-bold">{stats.total_applications}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-sm text-gray-500">New Applications</h3>
+          <div className="bg-white overflow-hidden shadow rounded-lg p-6">
+            <h3 className="text-sm font-medium text-gray-500">New Applications</h3>
             <p className="text-2xl font-bold">{stats.new_applications}</p>
           </div>
         </div>
