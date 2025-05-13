@@ -33,18 +33,18 @@ export default function Login() {
         body: JSON.stringify(formData),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to login');
+        throw new Error(responseData.message || 'Failed to login');
       }
 
-      const { data } = await response.json();
-      
-      // Store the token in localStorage
-      localStorage.setItem('token', data.token);
+      // Store the token and user data in localStorage with the correct key
+      localStorage.setItem('auth_token', responseData.access_token);
+      localStorage.setItem('user', JSON.stringify(responseData.user));
       
       // Redirect based on user role
-      switch (data.user.role) {
+      switch (responseData.user.role) {
         case 'admin':
           router.push('/admin');
           break;
@@ -179,4 +179,4 @@ export default function Login() {
       </div>
     </div>
   );
-} 
+}
