@@ -1,103 +1,148 @@
-import Image from "next/image";
+"use client"
+
+import React from 'react';
+import Link from 'next/link';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+            {/* Hero Section */}
+            <div className="relative overflow-hidden pt-8 sm:pt-12 md:pt-16">
+                <div className="max-w-7xl mx-auto py-24 px-4 sm:px-6 lg:px-8">
+                    <div className="text-center">
+                        <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                            <span className="block">Find your dream</span>
+                            <span className="block text-blue-600">internship today</span>
+                        </h1>
+                        <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                            Connect with top companies and discover exciting internship opportunities that match your skills and interests.
+                        </p>
+                    </div>
+                </div>
+                <div className="absolute inset-0 -z-10">
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-transparent"></div>
+                </div>
+            </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {/* Why Choose Us Section */}
+            <div className="py-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center">
+                        <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                            Why Choose InternHub?
+                        </h2>
+                        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                            {/* Feature boxes */}
+                            <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+                                <div className="text-blue-600 text-5xl mb-6">🎯</div>
+                                <h3 className="text-xl font-semibold text-gray-900">Targeted Opportunities</h3>
+                                <p className="mt-4 text-gray-600">
+                                    Find internships that match your skills and career goals with our advanced matching system.
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+                                <div className="text-blue-600 text-5xl mb-6">🤝</div>
+                                <h3 className="text-xl font-semibold text-gray-900">Direct Connections</h3>
+                                <p className="mt-4 text-gray-600">
+                                    Connect directly with companies and receive personalized feedback on your applications.
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+                                <div className="text-blue-600 text-5xl mb-6">📈</div>
+                                <h3 className="text-xl font-semibold text-gray-900">Career Growth</h3>
+                                <p className="mt-4 text-gray-600">
+                                    Build your professional network and gain valuable experience to boost your career.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        {/* Registration buttons */}
+                        <div className="mt-12">
+                            <div className="flex flex-row justify-center gap-4">
+                                <Link
+                                    href="/auth/register/student"
+                                    className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-sm"
+                                >
+                                    Register as Student
+                                </Link>
+                                <Link
+                                    href="/auth/register/company"
+                                    className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 shadow-sm"
+                                >
+                                    Register as Company
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Demo Section */}
+            <div className="py-16 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                            See How It Works
+                        </h2>
+                        <p className="mt-4 text-lg text-gray-600">
+                            Discover how students and companies benefit from InternHub
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-12 md:grid-cols-2 items-center">
+                        <div className="space-y-6">
+                            <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-4">For Students</h3>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start">
+                                        <span className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mr-3">1</span>
+                                        <span className="text-gray-600">Create your profile and showcase your skills</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mr-3">2</span>
+                                        <span className="text-gray-600">Browse and apply to internships that match your interests</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mr-3">3</span>
+                                        <span className="text-gray-600">Track your applications and receive feedback</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-4">For Companies</h3>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start">
+                                        <span className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mr-3">1</span>
+                                        <span className="text-gray-600">Post internship opportunities and requirements</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mr-3">2</span>
+                                        <span className="text-gray-600">Review applications and connect with candidates</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mr-3">3</span>
+                                        <span className="text-gray-600">Manage your hiring process efficiently</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div className="relative">
+                            <div className="rounded-xl overflow-hidden shadow-lg">
+                                <div className="relative overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 flex flex-col items-center justify-center p-6">
+                                        <svg className="w-16 h-16 text-white mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span className="text-white text-2xl font-semibold text-center">Internship Platform Demo</span>
+                                        <p className="text-blue-100 mt-2 text-center">See how our platform connects students and companies</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }
