@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { StudentUser, DashboardStats, InternshipOpportunity } from '../../types/student';
+import { DashboardStats, InternshipOpportunity } from '../../types/student';
 
 export default function StudentDashboard() {
   const router = useRouter();

@@ -2,7 +2,6 @@
 
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { StudentUser } from '../../types/student';
 
 export default function StudentDashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
