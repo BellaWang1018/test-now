@@ -1,265 +1,238 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
-interface FormData {
-  title: string;
-  location: string;
-  type: 'remote' | 'hybrid' | 'onsite';
-  salary_range: string;
-  description: string;
-  requirements: string;
-  application_deadline: string;
-}
+// Define the schema shape first
+const internshipFormSchema = {
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  location: z.string().min(1, 'Location is required'),
+  salary_min: z.string().optional(),
+  salary_max: z.string().optional(),
+  accepts_opt: z.literal(true).or(z.literal(false)),
+  accepts_cpt: z.literal(true).or(z.literal(false)),
+  offers_certificate: z.literal(true).or(z.literal(false)),
+  hard_requirements: z.string().optional(),
+  application_deadline: z.string().min(1, 'Application deadline is required'),
+} as const;
+
+// Create the schema from the shape
+const internshipSchema = z.object(internshipFormSchema);
+
+// Infer the type from the schema
+type InternshipFormData = z.infer<typeof internshipSchema>;
 
 export default function NewInternship() {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    title: '',
-    location: '',
-    type: 'onsite',
-    salary_range: '',
-    description: '',
-    requirements: '',
-    application_deadline: ''
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<InternshipFormData>({
+    resolver: zodResolver(internshipSchema),
+    defaultValues: {
+      accepts_opt: false,
+      accepts_cpt: false,
+      offers_certificate: false,
+    }
   });
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    const checkAuth = () => {
-      const authToken = localStorage.getItem('auth_token');
-      const userData = localStorage.getItem('user');
-      
-      if (!authToken || !userData) {
-        router.push('/auth/login');
-        return;
-      }
-
-      const parsedUserData = JSON.parse(userData);
-      
-      if (parsedUserData.role !== 'company') {
-        router.push('/student/dashboard');
-        return;
-      }
-    };
-
-    checkAuth();
-  }, [router, mounted]);
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
+  const onSubmit = async (data: InternshipFormData) => {
     try {
-      const authToken = localStorage.getItem('auth_token');
-      if (!authToken) {
+      setIsLoading(true);
+      setError(null);
+      
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
         router.push('/auth/login');
         return;
       }
-
-      // Convert requirements string to array
-      const requirementsArray = formData.requirements
-        .split('\n')
-        .map(req => req.trim())
-        .filter(req => req.length > 0);
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
       const response = await fetch(`${API_URL}/api/company/internships`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          ...formData,
-          requirements: requirementsArray
-        })
+          ...data,
+          salary_min: data.salary_min ? parseFloat(data.salary_min) : null,
+          salary_max: data.salary_max ? parseFloat(data.salary_max) : null,
+        }),
       });
-
+      
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Failed to create internship');
+        throw new Error(responseData.message || 'Failed to post internship');
       }
-
+      
       router.push('/company/internships');
-    } catch (error) {
-      console.error('Error creating internship:', error);
-      setError('Failed to create internship. Please try again.');
+    } catch (err) {
+      console.error('Error posting internship:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred while posting the internship');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Post New Internship</h1>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Post a New Internship</h1>
+          <p className="mt-3 text-xl text-gray-500">
+            Fill out the form below to create a new internship opportunity
+          </p>
+        </div>
+        
+        <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Internship Title</label>
+              <input
+                {...register('title')}
+                type="text"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="e.g. Software Engineering Intern"
+              />
+              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
+            </div>
 
-        {error && (
-          <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-            {error}
-          </div>
-        )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                {...register('description')}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                rows={4}
+                placeholder="Describe the internship responsibilities, projects, and what interns will learn"
+              />
+              {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <div className="grid grid-cols-1 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Location</label>
+              <input
+                {...register('location')}
+                type="text"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="e.g. San Francisco, CA or Remote"
+              />
+              {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                  Internship Title *
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Minimum Salary (Optional)</label>
                 <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  required
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="e.g., Software Engineering Intern"
+                  {...register('salary_min')}
+                  type="number"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  placeholder="e.g. 25000"
                 />
               </div>
 
               <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                  Location *
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Maximum Salary (Optional)</label>
                 <input
-                  type="text"
-                  id="location"
-                  name="location"
-                  required
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="e.g., San Francisco, CA"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-                  Work Type *
-                </label>
-                <select
-                  id="type"
-                  name="type"
-                  required
-                  value={formData.type}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                >
-                  <option value="remote">Remote</option>
-                  <option value="hybrid">Hybrid</option>
-                  <option value="onsite">On-site</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="salary_range" className="block text-sm font-medium text-gray-700">
-                  Salary Range *
-                </label>
-                <input
-                  type="text"
-                  id="salary_range"
-                  name="salary_range"
-                  required
-                  value={formData.salary_range}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="e.g., $20-25/hour"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                  Description *
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  required
-                  rows={4}
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="Describe the internship role and responsibilities..."
-                />
-              </div>
-
-              <div>
-                <label htmlFor="requirements" className="block text-sm font-medium text-gray-700">
-                  Requirements *
-                </label>
-                <textarea
-                  id="requirements"
-                  name="requirements"
-                  required
-                  rows={4}
-                  value={formData.requirements}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="Enter each requirement on a new line..."
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Enter each requirement on a new line
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="application_deadline" className="block text-sm font-medium text-gray-700">
-                  Application Deadline *
-                </label>
-                <input
-                  type="date"
-                  id="application_deadline"
-                  name="application_deadline"
-                  required
-                  value={formData.application_deadline}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  {...register('salary_max')}
+                  type="number"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  placeholder="e.g. 35000"
                 />
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Cancel
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Application Deadline</label>
+              <input
+                {...register('application_deadline')}
+                type="date"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              />
+              {errors.application_deadline && (
+                <p className="mt-1 text-sm text-red-600">{errors.application_deadline.message}</p>
+              )}
+            </div>
+
+            <div className="border-t border-gray-200 pt-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Internship Qualifications</h3>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Hard Requirements</label>
+                <textarea
+                  {...register('hard_requirements')}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  rows={3}
+                  placeholder="List specific skills, coursework, or qualifications required"
+                />
+              </div>
+              
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center">
+                  <input
+                    id="accepts_opt"
+                    {...register('accepts_opt')}
+                    type="checkbox"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="accepts_opt" className="ml-2 block text-sm text-gray-700">
+                    Accepts OPT (Optional Practical Training)
+                  </label>
+                </div>
+                
+                <div className="flex items-center">
+                  <input
+                    id="accepts_cpt"
+                    {...register('accepts_cpt')}
+                    type="checkbox"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="accepts_cpt" className="ml-2 block text-sm text-gray-700">
+                    Accepts CPT (Curricular Practical Training)
+                  </label>
+                </div>
+                
+                <div className="flex items-center">
+                  <input
+                    id="offers_certificate"
+                    {...register('offers_certificate')}
+                    type="checkbox"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="offers_certificate" className="ml-2 block text-sm text-gray-700">
+                    Offers Certificate of Completion
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4">
               <button
                 type="submit"
-                disabled={loading}
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                disabled={isLoading}
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                {loading ? 'Posting...' : 'Post Internship'}
+                {isLoading ? 'Posting...' : 'Post Internship'}
               </button>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
