@@ -24,7 +24,6 @@ interface Internship {
   hard_requirements: string;
   application_count: number;
   is_active: boolean;
-  application_status?: 'applied' | 'interviewing' | 'offered' | 'rejected';
 }
 
 interface Filters {
@@ -42,80 +41,82 @@ interface Filters {
 
 // Card component for displaying internships
 const InternshipCard: React.FC<{ internship: Internship }> = ({ internship }) => {
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+    return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
+  };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
-      <div className="p-6">
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <Link 
-              href={`/internships/${internship.id}`}
-              className="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors duration-150"
-            >
-              {internship.title}
-            </Link>
-            <p className="mt-1 text-sm text-gray-600">{internship.company.name}</p>
-          </div>
-          <div className="ml-4 flex-shrink-0">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              internship.status === 'open' ? 'bg-green-100 text-green-800' :
-              internship.status === 'closed' ? 'bg-red-100 text-red-800' :
-              'bg-gray-100 text-gray-800'
-            }`}>
-              {internship.status.charAt(0).toUpperCase() + internship.status.slice(1)}
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="flex items-center text-sm text-gray-500">
-            <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            {internship.location}
-          </div>
-          <div className="flex items-center text-sm text-gray-500">
-            <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            ${internship.salary_min?.toLocaleString()} - ${internship.salary_max?.toLocaleString()}
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {internship.accepts_opt && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              OPT
-            </span>
-          )}
-          {internship.accepts_cpt && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-              CPT
-            </span>
-          )}
-          {internship.offers_certificate && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              Certificate
-            </span>
-          )}
-        </div>
-
-        <div className="mt-4 flex justify-between items-center">
-          <span className="text-sm text-gray-500">
-            Application deadline: {new Date(internship.application_deadline).toLocaleDateString()}
-          </span>
+    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+      <div className="flex justify-between items-start mb-4">
+        <div>
           <Link 
-            href={`/internships/${internship.id}/apply`}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              internship.status === 'open' && !internship.application_status
-                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-            }`}
+            href={`/internships/${internship.id}`}
+            className="text-xl font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
           >
-            {internship.application_status ? 'View Application' : 'Apply Now'}
+            {internship.title}
           </Link>
+          <p className="text-gray-600 mt-1">{internship.company.name}</p>
         </div>
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+          internship.status === 'open' ? 'bg-green-100 text-green-800' :
+          internship.status === 'closed' ? 'bg-red-100 text-red-800' :
+          'bg-gray-100 text-gray-800'
+        }`}>
+          {internship.status.charAt(0).toUpperCase() + internship.status.slice(1)}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="flex items-center text-gray-600">
+          <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          {internship.location}
+        </div>
+        <div className="flex items-center text-gray-600">
+          <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          ${internship.salary_min?.toLocaleString()} - ${internship.salary_max?.toLocaleString()}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        {internship.accepts_opt && (
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">OPT</span>
+        )}
+        {internship.accepts_cpt && (
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">CPT</span>
+        )}
+        {internship.offers_certificate && (
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Certificate</span>
+        )}
+      </div>
+
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-gray-500">Posted {getTimeAgo(internship.created_at)}</span>
+        <Link 
+          href={internship.status === 'open' ? 
+            `/auth/login?redirect=/internships/${internship.id}/apply` : 
+            '#'
+          }
+          className={`px-4 py-2 rounded-md text-sm font-medium ${
+            internship.status === 'open'
+              ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {internship.status === 'open' ? 'Apply Now' : 'Closed'}
+        </Link>
       </div>
     </div>
   );
@@ -221,168 +222,208 @@ export default function InternshipsPage() {
   if (!mounted || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg font-semibold">Loading...</div>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Find Your Next Internship</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <div className="lg:w-1/4">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
+              <h2 className="text-xl font-semibold mb-6">Filters</h2>
+              
+              {/* Search */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Search
+                </label>
+                <input
+                  type="text"
+                  name="search"
+                  value={filters.search}
+                  onChange={handleFilterChange}
+                  placeholder="Search internships..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
 
-        {/* Search and Filters */}
-        <div className="bg-white shadow rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700">
-                Search
-              </label>
-              <input
-                type="text"
-                id="search"
-                name="search"
-                value={filters.search}
-                onChange={handleFilterChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                placeholder="Search by title or company..."
-              />
-            </div>
+              {/* Location */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  value={filters.location}
+                  onChange={handleFilterChange}
+                  placeholder="Enter location"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                Location
-              </label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={filters.location}
-                onChange={handleFilterChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                placeholder="Enter location..."
-              />
-            </div>
+              {/* Status */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <select
+                  name="status"
+                  value={filters.status}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  <option value="">All Status</option>
+                  <option value="open">Open</option>
+                  <option value="closed">Closed</option>
+                  <option value="filled">Filled</option>
+                </select>
+              </div>
 
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                Status
-              </label>
-              <select
-                id="status"
-                name="status"
-                value={filters.status}
-                onChange={handleFilterChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              >
-                <option value="">All Status</option>
-                <option value="open">Open</option>
-                <option value="closed">Closed</option>
-                <option value="filled">Filled</option>
-              </select>
-            </div>
+              {/* Minimum Salary */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Minimum Salary
+                </label>
+                <input
+                  type="number"
+                  name="min_salary"
+                  value={filters.min_salary}
+                  onChange={handleFilterChange}
+                  placeholder="Enter minimum salary"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="min_salary" className="block text-sm font-medium text-gray-700">
-                Minimum Salary
-              </label>
-              <input
-                type="number"
-                id="min_salary"
-                name="min_salary"
-                value={filters.min_salary}
-                onChange={handleFilterChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                placeholder="Enter minimum salary..."
-              />
-            </div>
-
-            <div>
-              <label htmlFor="date_range" className="block text-sm font-medium text-gray-700">
-                Date Range
-              </label>
-              <select
-                id="date_range"
-                name="date_range"
-                value={filters.date_range}
-                onChange={handleFilterChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              >
-                <option value="">Any Time</option>
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-              </select>
-            </div>
-
-            <div className="space-y-4">
-              <div>
+              {/* Visa Requirements */}
+              <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Visa Support
                 </label>
                 <div className="space-y-2">
-                  <label className="inline-flex items-center">
+                  <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={filters.visa.opt}
                       onChange={() => handleVisaFilterChange('opt')}
-                      className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
                     <span className="ml-2 text-sm text-gray-600">OPT</span>
                   </label>
-                  <label className="inline-flex items-center ml-4">
+                  <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={filters.visa.cpt}
                       onChange={() => handleVisaFilterChange('cpt')}
-                      className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
                     <span className="ml-2 text-sm text-gray-600">CPT</span>
                   </label>
                 </div>
               </div>
 
-              <div>
-                <label className="inline-flex items-center">
+              {/* Certificate */}
+              <div className="mb-6">
+                <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={filters.certificate}
                     onChange={handleCertificateFilterChange}
-                    className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   />
                   <span className="ml-2 text-sm text-gray-600">Offers Certificate</span>
                 </label>
               </div>
+
+              {/* Reset Filters */}
+              <button
+                onClick={resetFilters}
+                className="w-full bg-gray-100 text-gray-700 py-2 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                Reset Filters
+              </button>
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end space-x-4">
-            <button
-              onClick={resetFilters}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Reset Filters
-            </button>
-          </div>
-        </div>
-
-        {error && (
-          <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-            {error}
-          </div>
-        )}
-
-        {/* Internships List */}
-        <div className="grid grid-cols-1 gap-6">
-          {internships.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No internships found matching your criteria.</p>
+          {/* Main Content */}
+          <div className="lg:w-3/4">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Available Internships</h1>
+                <p className="text-gray-600 mt-2">
+                  {internships.length} opportunities found
+                </p>
+              </div>
+              <Link
+                href="/auth/login"
+                className="text-indigo-600 hover:text-indigo-800 transition-colors"
+              >
+                Log in to track your applications
+              </Link>
             </div>
-          ) : (
-            internships.map((internship) => (
-              <InternshipCard key={internship.id} internship={internship} />
-            ))
-          )}
+
+            {/* Search Bar */}
+            <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  name="search"
+                  value={filters.search}
+                  onChange={handleFilterChange}
+                  placeholder="Search internships by title, company, or keyword"
+                  className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+                <button 
+                  className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+                  onClick={() => {/* Search handled by filter state */}}
+                >
+                  Search
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            {/* Internships List */}
+            <div className="space-y-4">
+              {internships.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-lg shadow-md">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No internships found</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Try adjusting your search filters to find more opportunities.
+                  </p>
+                </div>
+              ) : (
+                internships.map((internship) => (
+                  <InternshipCard key={internship.id} internship={internship} />
+                ))
+              )}
+            </div>
+
+            {/* Pagination */}
+            {internships.length > 0 && (
+              <div className="mt-8 flex justify-center">
+                <nav className="flex items-center space-x-2">
+                  <button className="px-3 py-2 rounded-md border hover:bg-gray-50">Previous</button>
+                  <button className="px-3 py-2 rounded-md border bg-indigo-600 text-white">1</button>
+                  <button className="px-3 py-2 rounded-md border hover:bg-gray-50">2</button>
+                  <button className="px-3 py-2 rounded-md border hover:bg-gray-50">3</button>
+                  <button className="px-3 py-2 rounded-md border hover:bg-gray-50">Next</button>
+                </nav>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
