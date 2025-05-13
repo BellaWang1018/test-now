@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { StudentUser } from '../../types/student';
 
 interface Application {
   id: string;

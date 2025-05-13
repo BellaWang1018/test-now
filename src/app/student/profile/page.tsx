@@ -2,13 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { StudentUser } from '../../types/student';
 
 export default function StudentProfile() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<StudentUser | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
@@ -51,7 +49,6 @@ export default function StudentProfile() {
           return;
         }
 
-        setUser(parsedUserData);
         setFormData({
           first_name: parsedUserData.first_name || '',
           last_name: parsedUserData.last_name || '',
