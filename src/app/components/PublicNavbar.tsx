@@ -4,11 +4,18 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 
+interface User {
+    id: string;
+    email: string;
+    role: 'student' | 'company';
+    name?: string;
+}
+
 export default function PublicNavbar() {
     const router = useRouter();
     const pathname = usePathname();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
