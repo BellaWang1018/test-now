@@ -13,14 +13,14 @@ interface FormData {
   application_deadline: string;
 }
 
-interface Internship extends FormData {
-  id: string;
-  status: 'active' | 'closed';
-  created_at: string;
-  updated_at: string;
+interface PageProps {
+  params: {
+    id: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default function EditInternship({ params }: { params: { id: string } }) {
+export default function EditInternship({ params }: PageProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);

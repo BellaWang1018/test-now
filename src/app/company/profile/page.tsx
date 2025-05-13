@@ -23,7 +23,6 @@ export default function CompanyProfile() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<CompanyUser | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     company_name: '',
@@ -63,7 +62,6 @@ export default function CompanyProfile() {
           return;
         }
 
-        setUser(parsedUserData);
         setFormData({
           company_name: parsedUserData.company_name || '',
           email: parsedUserData.email || '',
