@@ -96,25 +96,25 @@ export default function PublicNavbar() {
                   Dashboard
                 </Link>
                 <Link
-                  href="/internships"
+                  href="/student/dashboard/jobs"
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   Find Internships
                 </Link>
                 <Link
-                  href="/student/internships"
+                  href="/student/dashboard/internships"
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   My Internships
                 </Link>
                 <Link
-                  href="/messages"
+                  href="/student/dashboard/inbox"
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   Inbox
                 </Link>
                 <Link
-                  href="/student/settings"
+                  href="/student/dashboard/settings"
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   Settings
