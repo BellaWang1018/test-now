@@ -36,6 +36,12 @@ interface RecentApplication {
   applied_at: string;
 }
 
+interface Internship {
+  is_active: boolean;
+  application_count: number;
+  // Add other relevant fields as needed
+}
+
 export default function CompanyDashboard() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -78,8 +84,8 @@ export default function CompanyDashboard() {
 
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
         
-        // Fetch dashboard stats
-        const statsResponse = await fetch(`${API_URL}/api/company/dashboard/stats`, {
+        // Fetch company internships
+        const statsResponse = await fetch(`${API_URL}/api/company/internships`, {
           headers: {
             'Authorization': `Bearer ${authToken}`,
             'Accept': 'application/json',
@@ -88,14 +94,27 @@ export default function CompanyDashboard() {
         });
 
         if (!statsResponse.ok) {
-          throw new Error('Failed to fetch dashboard stats');
+          throw new Error('Failed to fetch company internships');
         }
 
-        const { data: statsData } = await statsResponse.json();
-        setStats(statsData);
+        const internshipsDataResponse = await statsResponse.json();
+        console.log('Internships Data Response:', internshipsDataResponse);
 
-        // Fetch recent applications
-        const applicationsResponse = await fetch(`${API_URL}/api/company/dashboard/recent-applications`, {
+        const internshipsData = internshipsDataResponse.data || internshipsDataResponse;
+
+        if (!Array.isArray(internshipsData)) {
+          throw new Error('Unexpected response format for internships data');
+        }
+
+        setStats({
+          total_internships: internshipsData.length,
+          active_internships: internshipsData.filter((i: Internship) => i.is_active).length,
+          total_applications: internshipsData.reduce((acc: number, i: Internship) => acc + i.application_count, 0),
+          new_applications: 0 // Placeholder, adjust as needed
+        });
+
+        // Fetch company applications
+        const applicationsResponse = await fetch(`${API_URL}/api/company/applications`, {
           headers: {
             'Authorization': `Bearer ${authToken}`,
             'Accept': 'application/json',
@@ -104,11 +123,11 @@ export default function CompanyDashboard() {
         });
 
         if (!applicationsResponse.ok) {
-          throw new Error('Failed to fetch recent applications');
+          throw new Error('Failed to fetch company applications');
         }
 
-        const { data: applicationsData } = await applicationsResponse.json();
-        setRecentApplications(applicationsData || []);
+        const applicationsData = await applicationsResponse.json();
+        setRecentApplications(applicationsData.data || []);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setError('Failed to load dashboard data');
