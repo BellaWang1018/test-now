@@ -7,7 +7,6 @@ import { StudentUser } from '../../types/student';
 export default function StudentDashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<StudentUser | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -37,7 +36,6 @@ export default function StudentDashboardLayout({ children }: { children: ReactNo
           return;
         }
         
-        setUser(parsedUserData);
       }
       
       setLoading(false);

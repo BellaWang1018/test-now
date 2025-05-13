@@ -7,7 +7,6 @@ import { StudentUser, DashboardStats, InternshipOpportunity } from '../../types/
 
 export default function StudentDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<StudentUser | null>(null);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
@@ -43,7 +42,6 @@ export default function StudentDashboard() {
         return;
       }
       
-      setUser(parsedUserData);
       fetchDashboardData(authToken);
     } catch (e) {
       console.error('Error loading user data', e);
@@ -72,7 +70,7 @@ export default function StudentDashboard() {
         throw new Error('Failed to fetch application stats');
       }
 
-      const { data: applications, stats } = await statsResponse.json();
+      const { stats } = await statsResponse.json();
       
       // Set stats from backend
       setStats({
