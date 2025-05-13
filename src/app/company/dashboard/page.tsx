@@ -36,10 +36,11 @@ interface RecentApplication {
   applied_at: string;
 }
 
-interface Internship {
-  is_active: boolean;
-  application_count: number;
-  // Add other relevant fields as needed
+interface InternshipData {
+  id: string;
+  is_active?: boolean;
+  status?: 'open' | 'closed' | 'filled';
+  application_count?: number;
 }
 
 export default function CompanyDashboard() {
@@ -97,19 +98,16 @@ export default function CompanyDashboard() {
           throw new Error('Failed to fetch company internships');
         }
 
-        const internshipsDataResponse = await statsResponse.json();
-        console.log('Internships Data Response:', internshipsDataResponse);
+        const internshipsData = await statsResponse.json();
+        console.log('Internships Data:', internshipsData);
 
-        const internshipsData = internshipsDataResponse.data || internshipsDataResponse;
-
-        if (!Array.isArray(internshipsData)) {
-          throw new Error('Unexpected response format for internships data');
-        }
+        // Handle both array and object with data property formats
+        const internships = Array.isArray(internshipsData) ? internshipsData : (internshipsData.data || []);
 
         setStats({
-          total_internships: internshipsData.length,
-          active_internships: internshipsData.filter((i: Internship) => i.is_active).length,
-          total_applications: internshipsData.reduce((acc: number, i: Internship) => acc + i.application_count, 0),
+          total_internships: internships.length,
+          active_internships: internships.filter((i: InternshipData) => i.is_active || i.status === 'open').length,
+          total_applications: internships.reduce((acc: number, i: InternshipData) => acc + (i.application_count || 0), 0),
           new_applications: 0 // Placeholder, adjust as needed
         });
 
