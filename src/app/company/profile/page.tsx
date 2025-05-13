@@ -3,21 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-interface CompanyUser {
-  id: string;
-  email: string;
-  company_name: string;
-  role: 'company';
-  description?: string;
-  website?: string;
-  location?: string;
-  industry?: string;
-  size?: string;
-  founded_year?: number;
-  logo_url?: string;
-  created_at: string;
-  updated_at: string;
-}
 
 export default function CompanyProfile() {
   const router = useRouter();
