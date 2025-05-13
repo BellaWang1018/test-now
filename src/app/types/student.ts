@@ -4,6 +4,15 @@ export interface StudentUser {
     first_name: string;
     last_name: string;
     role: 'student';
+    phone?: string;
+    location?: string;
+    bio?: string;
+    education?: string;
+    skills?: string;
+    resume_url?: string;
+    linkedin_url?: string;
+    github_url?: string;
+    portfolio_url?: string;
     created_at: string;
     updated_at: string;
 }
