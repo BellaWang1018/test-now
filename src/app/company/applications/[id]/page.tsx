@@ -39,11 +39,9 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    setMounted(true);
     const fetchApplicationDetails = async () => {
       try {
         const token = localStorage.getItem('auth_token');
@@ -77,14 +75,8 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
       }
     };
 
-    if (mounted) {
-      fetchApplicationDetails();
-    }
-
-    return () => {
-      setMounted(false);
-    };
-  }, [resolvedParams.id, router, mounted]);
+    fetchApplicationDetails();
+  }, [resolvedParams.id, router]);
 
   const handleStatusUpdate = async (newStatus: Application['company_status']) => {
     try {
@@ -192,18 +184,23 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
             </svg>
             Back to Candidates
           </button>
-          <select
-            value={application.company_status}
-            onChange={(e) => handleStatusUpdate(e.target.value as Application['company_status'])}
-            className="block w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          >
-            <option value="pending">Pending</option>
-            <option value="send interview invitation">Send Interview Invitation</option>
-            <option value="interviewing">Interviewing</option>
-            <option value="reviewing">Reviewing</option>
-            <option value="accepted">Accepted</option>
-            <option value="rejected">Rejected</option>
-          </select>
+          <div className="flex items-center space-x-4">
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.company_status)}`}>
+              {application.company_status.replace(/_/g, ' ').toUpperCase()}
+            </span>
+            <select
+              value={application.company_status}
+              onChange={(e) => handleStatusUpdate(e.target.value as Application['company_status'])}
+              className="block w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            >
+              <option value="pending">Pending</option>
+              <option value="send interview invitation">Send Interview Invitation</option>
+              <option value="interviewing">Interviewing</option>
+              <option value="reviewing">Reviewing</option>
+              <option value="accepted">Accepted</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
         </div>
 
         <div className="bg-white shadow rounded-lg overflow-hidden">
