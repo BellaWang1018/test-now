@@ -65,7 +65,7 @@ const InternshipCard: React.FC<{ internship: Internship }> = ({ internship }) =>
               internship.status === 'closed' ? 'bg-red-100 text-red-800' :
               'bg-gray-100 text-gray-800'
             }`}>
-              {internship.status.charAt(0).toUpperCase() + internship.status.slice(1)}
+              {(internship.status || 'pending').charAt(0).toUpperCase() + (internship.status || 'pending').slice(1)}
             </span>
           </div>
         </div>

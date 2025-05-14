@@ -1,186 +1,250 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import axios from 'axios';
 
 interface Application {
-  id: string;
+  id: number;
   student: {
-    id: string;
-    first_name: string;
-    last_name: string;
+    id: number;
+    name: string;
     email: string;
+    university: string;
+    major: string;
+    graduation_year: number;
+    skills: string[];
+    bio: string | null;
+    resume_path: string | null;
+    user?: {
+      id: number;
+    };
   };
   internship: {
-    id: string;
+    id: number;
     title: string;
   };
-  status: 'pending' | 'reviewing' | 'interview' | 'accepted' | 'rejected';
-  applied_at: string;
+  application: {
+    cover_letter: string;
+    resume_path: string | null;
+    portfolio_url: string | null;
+  };
+  student_status: 'applied' | 'interviewing' | 'offered' | 'rejected';
+  company_status: 'pending' | 'send interview invitation' | 'interviewing' | 'reviewing' | 'accepted' | 'rejected';
+  created_at: string;
 }
 
 export default function CompanyApplications() {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setMounted(true);
+    fetchApplications();
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
+  const fetchApplications = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        router.push('/auth/login');
+        return;
+      }
 
-    const fetchApplications = async () => {
-      try {
-        const authToken = localStorage.getItem('auth_token');
-        const userData = localStorage.getItem('user');
-        
-        if (!authToken || !userData) {
-          router.push('/auth/login');
-          return;
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+      const response = await axios.get(`${API_URL}/api/company/applications`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
         }
+      });
 
-        const parsedUserData = JSON.parse(userData);
-        
-        if (parsedUserData.role !== 'company') {
-          router.push('/student/dashboard');
-          return;
-        }
+      setApplications(response.data.data);
+    } catch (err) {
+      console.error('Error fetching applications:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch applications');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
-        const response = await fetch(`${API_URL}/api/company/applications`, {
+  const handleStatusUpdate = async (applicationId: number, newStatus: Application['company_status'], e: React.MouseEvent | React.ChangeEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking the select
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setError('Please log in to update application status');
+        return;
+      }
+
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+      await axios.put(
+        `${API_URL}/api/company/applications/${applicationId}/status`,
+        { company_status: newStatus },
+        {
           headers: {
-            'Authorization': `Bearer ${authToken}`,
+            'Authorization': `Bearer ${token}`,
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch applications');
         }
+      );
 
-        const { data } = await response.json();
-        setApplications(data || []);
-      } catch (error) {
-        console.error('Error fetching applications:', error);
-        setError('Failed to load applications');
-      } finally {
-        setLoading(false);
+      // If status is "send interview invitation", send a message to the student
+      if (newStatus === 'send interview invitation') {
+        const application = applications.find(app => app.id === applicationId);
+        if (application?.student?.user?.id) {
+          try {
+            await axios.post(
+              `${API_URL}/api/company/messages`,
+              {
+                receiver_id: application.student.user.id,
+                receiver_role: 'student',
+                content: `You have received an interview invitation for the ${application.internship.title} position. Please check your application status and respond accordingly.`
+              },
+              {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+          } catch (error) {
+            console.error('Failed to send notification message:', error);
+            // Don't throw error here as the status update was successful
+          }
+        }
       }
-    };
 
-    fetchApplications();
-  }, [router, mounted]);
+      setApplications(applications.map(app => 
+        app.id === applicationId ? { ...app, company_status: newStatus } : app
+      ));
+    } catch (err) {
+      console.error('Error updating status:', err);
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to update status');
+      }
+    }
+  };
 
-  if (!mounted || loading) {
+  const getStatusColor = (status: Application['company_status']) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'send interview invitation':
+        return 'bg-blue-100 text-blue-800';
+      case 'interviewing':
+        return 'bg-purple-100 text-purple-800';
+      case 'reviewing':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'accepted':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-lg font-semibold">Loading...</div>
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
-          <Link
-            href="/company/dashboard/internships/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Post New Internship
-          </Link>
+          <p className="mt-2 text-sm text-gray-600">
+            Manage and review applications for your internship positions
+          </p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-            {error}
+        {applications.length === 0 ? (
+          <div className="bg-white rounded-lg shadow px-5 py-6 sm:px-6">
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-gray-900">No applications yet</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                When students apply for your internships, they will appear here.
+              </p>
+            </div>
           </div>
-        )}
-
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-          {applications.length > 0 ? (
-            <div className="divide-y divide-gray-200">
-              {applications.map((application) => (
-                <div key={application.id} className="p-6 hover:bg-gray-50 transition duration-150">
-                  <div className="flex items-start justify-between">
+        ) : (
+          <ul role="list" className="space-y-4">
+            {applications.map((application) => (
+              <li
+                key={application.id}
+                onClick={() => router.push(`/company/applications/${application.id}`)}
+                className="bg-white shadow rounded-lg cursor-pointer hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="px-4 py-4 sm:px-6">
+                  <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-3">
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900">
-                            {application.student.first_name} {application.student.last_name}
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            {application.internship.title}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center">
+                      <h2 className="text-lg font-medium text-gray-900 truncate">
+                        {application.student.name}
+                      </h2>
+                      <div className="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
                           <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                           </svg>
                           {application.student.email}
                         </div>
-                        <div className="flex items-center">
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
                           <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
-                          Applied on {new Date(application.applied_at).toLocaleDateString()}
+                          {application.student.university}
+                        </div>
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                          <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                          </svg>
+                          {application.student.major}
                         </div>
                       </div>
                     </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
-                        {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                    <div className="ml-4 flex-shrink-0 flex items-center space-x-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.company_status)}`}>
+                        {application.company_status.replace(/_/g, ' ').toUpperCase()}
                       </span>
+                      <select
+                        value={application.company_status}
+                        onChange={(e) => handleStatusUpdate(application.id, e.target.value as Application['company_status'], e)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="block w-48 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="send interview invitation">Send Interview Invitation</option>
+                        <option value="interviewing">Interviewing</option>
+                        <option value="reviewing">Reviewing</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No applications</h3>
-              <p className="mt-1 text-sm text-gray-500">Get started by posting an internship.</p>
-              <div className="mt-6">
-                <Link
-                  href="/company/dashboard/internships/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Post Internship
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
-}
-
-function getStatusColor(status: Application['status']) {
-  switch (status) {
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'reviewing':
-      return 'bg-blue-100 text-blue-800';
-    case 'interview':
-      return 'bg-purple-100 text-purple-800';
-    case 'accepted':
-      return 'bg-green-100 text-green-800';
-    case 'rejected':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
 }

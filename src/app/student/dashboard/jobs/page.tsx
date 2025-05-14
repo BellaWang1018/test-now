@@ -112,7 +112,7 @@ const AuthJobCard: React.FC<AuthJobCardProps> = ({ internship }) => {
                     ? 'bg-blue-100 text-blue-800' 
                     : 'bg-red-100 text-red-800'
               }`}>
-                {internship.status.charAt(0).toUpperCase() + internship.status.slice(1)}
+                {(internship.status || 'pending').charAt(0).toUpperCase() + (internship.status || 'pending').slice(1)}
               </span>
             </div>
           </div>

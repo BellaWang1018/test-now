@@ -220,7 +220,7 @@ export default function CompanyDashboard() {
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-medium text-gray-900">Recent Applications</h2>
               <Link
-                href="/company/dashboard/applications"
+                href="/company/applications"
                 className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
               >
                 View all
@@ -260,7 +260,7 @@ export default function CompanyDashboard() {
                     </div>
                     <div className="ml-4 flex-shrink-0">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
-                        {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                        {(application.status || 'pending').charAt(0).toUpperCase() + (application.status || 'pending').slice(1)}
                       </span>
                     </div>
                   </div>

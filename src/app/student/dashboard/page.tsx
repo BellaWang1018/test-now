@@ -186,7 +186,7 @@ export default function StudentDashboard() {
                         opportunity.status === 'closed' ? 'bg-red-100 text-red-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
-                        {opportunity.status.charAt(0).toUpperCase() + opportunity.status.slice(1)}
+                        {(opportunity.status || 'pending').charAt(0).toUpperCase() + (opportunity.status || 'pending').slice(1)}
                       </span>
                       <div className="flex items-center space-x-1">
                         {opportunity.accepts_opt && (
