@@ -142,7 +142,7 @@ export default function StudentDashboard() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-900">New Opportunities</h2>
           <Link 
-            href="/student/dashboard/internships" 
+            href="/student/dashboard/jobs" 
             className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center"
           >
             View all
@@ -156,7 +156,7 @@ export default function StudentDashboard() {
             newOpportunities.slice(0, 3).map((opportunity) => (
               <Link 
                 key={opportunity.id} 
-                href={`/student/dashboard/internships/${opportunity.id}`}
+                href={`/student/dashboard/jobs/${opportunity.id}`}
                 className="block border border-gray-100 rounded-lg p-4 hover:border-indigo-200 hover:bg-indigo-50/50 transition-all duration-200"
               >
                 <div className="flex justify-between items-start">
