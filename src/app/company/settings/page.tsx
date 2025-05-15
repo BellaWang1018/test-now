@@ -3,14 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-interface CompanyUser {
-  id: string;
-  email: string;
-  role: 'company';
-  created_at: string;
-  updated_at: string;
-}
-
 export default function CompanySettings() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
