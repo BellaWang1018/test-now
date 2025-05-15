@@ -2,20 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 interface CompanyUser {
   id: string;
   email: string;
   role: 'company';
-  companyLogo?: string;
   created_at: string;
   updated_at: string;
 }
 
 export default function CompanySettings() {
   const router = useRouter();
-  const [user, setUser] = useState<CompanyUser | null>(null);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('profile');
@@ -66,8 +63,6 @@ export default function CompanySettings() {
         router.push('/student/dashboard');
         return;
       }
-      
-      setUser(parsedUser);
       
       // Fetch profile data
       fetchProfileData(authToken);
