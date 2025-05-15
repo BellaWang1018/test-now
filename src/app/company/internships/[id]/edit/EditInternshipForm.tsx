@@ -160,32 +160,45 @@ export default function EditInternshipForm({ internshipId }: EditInternshipFormP
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Edit Internship</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150"
+          >
+            <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Internships
+          </button>
+        </div>
 
-        {error && (
-          <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-            {error}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-100">
+            <h1 className="text-2xl font-bold text-gray-900">Edit Internship</h1>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <div className="grid grid-cols-1 gap-6">
+          <div className="px-6 py-5">
+            {error && (
+              <div className="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700">
                   Internship Title *
                 </label>
                 <input
-                  type="text"
                   id="title"
                   name="title"
-                  required
+                  type="text"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="e.g., Software Engineering Intern"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="e.g. Software Engineering Intern"
                 />
               </div>
 
@@ -196,12 +209,11 @@ export default function EditInternshipForm({ internshipId }: EditInternshipFormP
                 <textarea
                   id="description"
                   name="description"
-                  required
                   value={formData.description}
                   onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   rows={4}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="Describe the internship role and responsibilities"
+                  placeholder="Describe the internship responsibilities, projects, and what interns will learn"
                 />
               </div>
 
@@ -210,30 +222,29 @@ export default function EditInternshipForm({ internshipId }: EditInternshipFormP
                   Location *
                 </label>
                 <input
-                  type="text"
                   id="location"
                   name="location"
-                  required
+                  type="text"
                   value={formData.location}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="e.g., San Francisco, CA"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="e.g. San Francisco, CA or Remote"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="salary_min" className="block text-sm font-medium text-gray-700">
                     Minimum Salary
                   </label>
                   <input
-                    type="number"
                     id="salary_min"
                     name="salary_min"
+                    type="number"
                     value={formData.salary_min}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    placeholder="e.g., 50000"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="e.g. 20000"
                   />
                 </div>
 
@@ -242,30 +253,15 @@ export default function EditInternshipForm({ internshipId }: EditInternshipFormP
                     Maximum Salary
                   </label>
                   <input
-                    type="number"
                     id="salary_max"
                     name="salary_max"
+                    type="number"
                     value={formData.salary_max}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    placeholder="e.g., 70000"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="e.g. 30000"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label htmlFor="hard_requirements" className="block text-sm font-medium text-gray-700">
-                  Requirements
-                </label>
-                <textarea
-                  id="hard_requirements"
-                  name="hard_requirements"
-                  value={formData.hard_requirements}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="List the requirements for this position"
-                />
               </div>
 
               <div>
@@ -273,110 +269,99 @@ export default function EditInternshipForm({ internshipId }: EditInternshipFormP
                   Application Deadline *
                 </label>
                 <input
-                  type="date"
                   id="application_deadline"
                   name="application_deadline"
-                  required
+                  type="date"
                   value={formData.application_deadline}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="hard_requirements" className="block text-sm font-medium text-gray-700">
+                  Hard Requirements
+                </label>
+                <textarea
+                  id="hard_requirements"
+                  name="hard_requirements"
+                  value={formData.hard_requirements}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  rows={3}
+                  placeholder="List specific skills, coursework, or qualifications required"
                 />
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="accepts_opt"
-                    name="accepts_opt"
-                    checked={formData.accepts_opt}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="accepts_opt" className="ml-2 block text-sm text-gray-700">
-                    Accepts OPT Students
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="accepts_cpt"
-                    name="accepts_cpt"
-                    checked={formData.accepts_cpt}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="accepts_cpt" className="ml-2 block text-sm text-gray-700">
-                    Accepts CPT Students
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="offers_certificate"
-                    name="offers_certificate"
-                    checked={formData.offers_certificate}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="offers_certificate" className="ml-2 block text-sm text-gray-700">
-                    Offers Certificate
-                  </label>
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="is_active"
-                    name="is_active"
-                    checked={formData.is_active}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
-                    Active Listing
-                  </label>
+                <h3 className="text-lg font-medium text-gray-900">Internship Qualifications</h3>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <input
+                      id="accepts_opt"
+                      name="accepts_opt"
+                      type="checkbox"
+                      checked={formData.accepts_opt}
+                      onChange={handleInputChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="accepts_opt" className="ml-2 block text-sm text-gray-700">
+                      Accepts OPT (Optional Practical Training)
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <input
+                      id="accepts_cpt"
+                      name="accepts_cpt"
+                      type="checkbox"
+                      checked={formData.accepts_cpt}
+                      onChange={handleInputChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="accepts_cpt" className="ml-2 block text-sm text-gray-700">
+                      Accepts CPT (Curricular Practical Training)
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <input
+                      id="offers_certificate"
+                      name="offers_certificate"
+                      type="checkbox"
+                      checked={formData.offers_certificate}
+                      onChange={handleInputChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="offers_certificate" className="ml-2 block text-sm text-gray-700">
+                      Offers Certificate
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                  Status
-                </label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  <option value="open">Open</option>
-                  <option value="closed">Closed</option>
-                  <option value="filled">Filled</option>
-                </select>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                    saving ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
               </div>
-            </div>
-
-            <div className="mt-6 flex items-center justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => router.push('/company/internships')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
