@@ -6,8 +6,8 @@ import PublicLayout from "./public-layout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "InternHub - Find Your Dream Internship",
-  description: "Connect with top companies and discover exciting internship opportunities that match your skills and interests.",
+  title: "First Interns - Find Your Dream Internship",
+  description: "Connect with top companies and find your perfect internship opportunity",
 };
 
 export default function RootLayout({

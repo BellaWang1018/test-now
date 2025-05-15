@@ -15,7 +15,7 @@ export default function Register() {
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">Create your account</h1>
           <p className="mt-4 text-lg text-gray-600">
-            Join InternHub and start your career journey today
+            Join First Interns and start your career journey today
           </p>
         </div>
 
