@@ -78,7 +78,7 @@ export default function CompanyRegistration() {
       
       // Redirect to login page with success message
       const successMessage = encodeURIComponent('Registration successful! We have sent a verification link to your email address. Please check your inbox and click the link to verify your account before logging in.');
-      router.push(`/login?message=${successMessage}&email=${encodeURIComponent(formData.email)}`);
+      router.push(`/auth/login?message=${successMessage}&email=${encodeURIComponent(formData.email)}`);
     } catch (error) {
       console.error('Registration error:', error);
       setError(error instanceof Error ? error.message : 'Failed to register');
@@ -314,7 +314,7 @@ export default function CompanyRegistration() {
         <div className="text-center mt-8">
           <p className="text-sm text-gray-600">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-500 hover:text-blue-600">
+            <Link href="/auth/login" className="text-blue-500 hover:text-blue-600">
               Sign in
             </Link>
           </p>

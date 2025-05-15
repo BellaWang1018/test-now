@@ -80,7 +80,7 @@ export default function PublicNavbar() {
                   Find Internships
                 </Link>
                 <Link
-                  href="/login"
+                  href="/auth/login"
                   className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:from-blue-700 hover:to-blue-600 transition-all duration-200 shadow-sm"
                 >
                   Login
