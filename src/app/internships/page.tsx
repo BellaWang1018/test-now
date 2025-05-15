@@ -284,6 +284,24 @@ export default function InternshipsPage() {
                 </select>
               </div>
 
+              {/* Date Range */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date Posted
+                </label>
+                <select
+                  name="date_range"
+                  value={filters.date_range}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  <option value="">Any Time</option>
+                  <option value="24h">Last 24 Hours</option>
+                  <option value="7d">Last 7 Days</option>
+                  <option value="30d">Last 30 Days</option>
+                </select>
+              </div>
+
               {/* Minimum Salary */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -299,10 +317,10 @@ export default function InternshipsPage() {
                 />
               </div>
 
-              {/* Visa Requirements */}
+              {/* Visa Options */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Visa Support
+                  Visa Options
                 </label>
                 <div className="space-y-2">
                   <label className="flex items-center">
@@ -312,7 +330,7 @@ export default function InternshipsPage() {
                       onChange={() => handleVisaFilterChange('opt')}
                       className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <span className="ml-2 text-sm text-gray-600">OPT</span>
+                    <span className="ml-2 text-sm text-gray-600">Accepts OPT</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -321,7 +339,7 @@ export default function InternshipsPage() {
                       onChange={() => handleVisaFilterChange('cpt')}
                       className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <span className="ml-2 text-sm text-gray-600">CPT</span>
+                    <span className="ml-2 text-sm text-gray-600">Accepts CPT</span>
                   </label>
                 </div>
               </div>
@@ -342,7 +360,7 @@ export default function InternshipsPage() {
               {/* Reset Filters */}
               <button
                 onClick={resetFilters}
-                className="w-full bg-gray-100 text-gray-700 py-2 rounded-md hover:bg-gray-200 transition-colors"
+                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
               >
                 Reset Filters
               </button>
@@ -364,26 +382,6 @@ export default function InternshipsPage() {
               >
                 Log in to track your applications
               </Link>
-            </div>
-
-            {/* Search Bar */}
-            <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  name="search"
-                  value={filters.search}
-                  onChange={handleFilterChange}
-                  placeholder="Search internships by title, company, or keyword"
-                  className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
-                <button 
-                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
-                  onClick={() => {/* Search handled by filter state */}}
-                >
-                  Search
-                </button>
-              </div>
             </div>
 
             {error && (
@@ -410,19 +408,6 @@ export default function InternshipsPage() {
                 ))
               )}
             </div>
-
-            {/* Pagination */}
-            {internships.length > 0 && (
-              <div className="mt-8 flex justify-center">
-                <nav className="flex items-center space-x-2">
-                  <button className="px-3 py-2 rounded-md border hover:bg-gray-50">Previous</button>
-                  <button className="px-3 py-2 rounded-md border bg-blue-600 text-white">1</button>
-                  <button className="px-3 py-2 rounded-md border hover:bg-gray-50">2</button>
-                  <button className="px-3 py-2 rounded-md border hover:bg-gray-50">3</button>
-                  <button className="px-3 py-2 rounded-md border hover:bg-gray-50">Next</button>
-                </nav>
-              </div>
-            )}
           </div>
         </div>
       </div>

@@ -47,17 +47,31 @@ export default function InternshipDetails({ internshipId }: InternshipDetailsPro
     const fetchInternship = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+        console.log('Fetching internship:', `${API_URL}/api/internships/${internshipId}`);
+        
         const response = await fetch(`${API_URL}/api/internships/${internshipId}`);
+        console.log('Response status:', response.status);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch internship details');
+          const errorText = await response.text();
+          console.error('API Error:', errorText);
+          throw new Error(`Failed to fetch internship details: ${response.status} ${errorText}`);
         }
 
-        const { data } = await response.json();
-        setInternship(data);
+        const responseData = await response.json();
+        console.log('API Response:', responseData);
+        
+        // Handle both response formats: { data: {...} } and direct internship object
+        const internshipData = responseData.data || responseData;
+        
+        if (!internshipData || typeof internshipData !== 'object') {
+          throw new Error('Invalid API response format: expected internship object');
+        }
+
+        setInternship(internshipData);
       } catch (error) {
         console.error('Error fetching internship:', error);
-        setError('Failed to load internship details');
+        setError(error instanceof Error ? error.message : 'Failed to load internship details');
       } finally {
         setLoading(false);
       }
@@ -68,25 +82,34 @@ export default function InternshipDetails({ internshipId }: InternshipDetailsPro
 
   if (!mounted || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg font-semibold">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (error || !internship) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg font-semibold text-red-600">
-          {error || 'Internship not found'}
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-lg font-semibold text-red-600 mb-4">
+            {error || 'Internship not found'}
+          </div>
+          <Link
+            href="/internships"
+            className="text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Return to Internships List
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Back Button */}
         <Link
           href="/internships"
           className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
@@ -97,14 +120,16 @@ export default function InternshipDetails({ internshipId }: InternshipDetailsPro
           Back to Internships
         </Link>
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="p-6">
+        {/* Main Content */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          {/* Header Section */}
+          <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
                   {internship.title}
                 </h1>
-                <p className="text-lg text-gray-600 mb-4">
+                <p className="text-lg text-gray-600">
                   {internship.company.name}
                 </p>
               </div>
@@ -116,24 +141,28 @@ export default function InternshipDetails({ internshipId }: InternshipDetailsPro
                 {(internship.status || 'pending').charAt(0).toUpperCase() + (internship.status || 'pending').slice(1)}
               </span>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Details Section */}
+          <div className="p-6">
+            {/* Key Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="space-y-4">
                 <div className="flex items-center text-gray-600">
-                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   {internship.location}
                 </div>
                 <div className="flex items-center text-gray-600">
-                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   ${internship.salary_min?.toLocaleString()} - ${internship.salary_max?.toLocaleString()}
                 </div>
                 <div className="flex items-center text-gray-600">
-                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   Apply by {new Date(internship.application_deadline).toLocaleDateString()}
@@ -167,20 +196,23 @@ export default function InternshipDetails({ internshipId }: InternshipDetailsPro
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            {/* Description */}
+            <div className="mb-8">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Description</h2>
               <div className="prose max-w-none text-gray-600">
                 {internship.description}
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            {/* Requirements */}
+            <div className="mb-8">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Requirements</h2>
               <div className="prose max-w-none text-gray-600">
                 {internship.hard_requirements}
               </div>
             </div>
 
+            {/* Application Section */}
             <div className="border-t border-gray-200 pt-6">
               <div className="flex justify-between items-center">
                 <div className="text-sm text-gray-500">
@@ -196,7 +228,7 @@ export default function InternshipDetails({ internshipId }: InternshipDetailsPro
                 </div>
                 <Link
                   href={`/internships/${internship.id}/apply`}
-                  className={`px-6 py-3 rounded-md text-sm font-medium ${
+                  className={`px-6 py-3 rounded-md text-sm font-medium transition-colors duration-200 ${
                     internship.status === 'open' && !internship.application_status
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'bg-gray-200 text-gray-500 cursor-not-allowed'

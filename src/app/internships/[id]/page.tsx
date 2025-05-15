@@ -1,6 +1,6 @@
 "use client"
-import InternshipDetails from './InternshipDetails';
 
+import InternshipDetails from './InternshipDetails';
 import React from 'react';
 
 interface PageProps {
@@ -9,7 +9,7 @@ interface PageProps {
   }>;
 }
 
-export default async function Page({ params }: PageProps) {
-  const resolvedParams = await params;
+export default function Page({ params }: PageProps) {
+  const resolvedParams = React.use(params);
   return <InternshipDetails internshipId={resolvedParams.id} />;
 } 
