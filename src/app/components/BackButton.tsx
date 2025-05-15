@@ -1,41 +1,25 @@
 "use client"
 
-import React from 'react';
 import { useRouter } from 'next/navigation';
 
-interface BackButtonProps {
-  href?: string;
-  className?: string;
-}
-
-export default function BackButton({ href, className = '' }: BackButtonProps) {
+export default function BackButton() {
   const router = useRouter();
-
-  const handleClick = () => {
-    if (href) {
-      router.push(href);
-    } else {
-      router.back();
-    }
-  };
 
   return (
     <button
-      onClick={handleClick}
-      className={`inline-flex items-center text-gray-600 hover:text-gray-900 ${className}`}
+      onClick={() => router.back()}
+      className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
     >
       <svg
-        className="h-5 w-5 mr-2"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
+        className="mr-2 h-5 w-5"
         xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
       >
         <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+          fillRule="evenodd"
+          d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L4.414 9H17a1 1 0 110 2H4.414l5.293 5.293a1 1 0 010 1.414z"
+          clipRule="evenodd"
         />
       </svg>
       Back
