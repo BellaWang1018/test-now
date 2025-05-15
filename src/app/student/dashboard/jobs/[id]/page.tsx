@@ -135,7 +135,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                 href={`/student/dashboard/jobs/${job.id}/apply`}
                 className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                   job.status === 'open' && !job.application_status
-                    ? 'bg-indigo-600 hover:bg-indigo-700'
+                    ? 'bg-blue-600 hover:bg-blue-700'
                     : 'bg-gray-400 cursor-not-allowed'
                 } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150`}
               >

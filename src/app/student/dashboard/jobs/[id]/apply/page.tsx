@@ -269,7 +269,7 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                     submitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >

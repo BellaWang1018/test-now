@@ -198,7 +198,7 @@ export default function InternshipDetails({ internshipId }: InternshipDetailsPro
                   href={`/internships/${internship.id}/apply`}
                   className={`px-6 py-3 rounded-md text-sm font-medium ${
                     internship.status === 'open' && !internship.application_status
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                   }`}
                 >

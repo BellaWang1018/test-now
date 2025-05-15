@@ -278,7 +278,7 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
                   href={application.student.resume_path}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                 >
                   View Resume
                 </a>
@@ -288,7 +288,7 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
                   href={application.application.portfolio_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                 >
                   View Portfolio
                 </a>

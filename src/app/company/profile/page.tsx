@@ -142,7 +142,7 @@ export default function CompanyProfile() {
           <h1 className="text-2xl font-bold">Company Profile</h1>
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             {isEditing ? 'Cancel' : 'Edit Profile'}
           </button>
@@ -303,7 +303,7 @@ export default function CompanyProfile() {
               <div className="mt-6 flex justify-end">
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Save Changes
                 </button>

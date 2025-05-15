@@ -111,7 +111,7 @@ const InternshipCard: React.FC<{ internship: Internship }> = ({ internship }) =>
           }
           className={`px-4 py-2 rounded-md text-sm font-medium ${
             internship.status === 'open'
-              ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
               : 'bg-gray-200 text-gray-500 cursor-not-allowed'
           }`}
         >
@@ -378,7 +378,7 @@ export default function InternshipsPage() {
                   className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 <button 
-                  className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
                   onClick={() => {/* Search handled by filter state */}}
                 >
                   Search
@@ -416,7 +416,7 @@ export default function InternshipsPage() {
               <div className="mt-8 flex justify-center">
                 <nav className="flex items-center space-x-2">
                   <button className="px-3 py-2 rounded-md border hover:bg-gray-50">Previous</button>
-                  <button className="px-3 py-2 rounded-md border bg-indigo-600 text-white">1</button>
+                  <button className="px-3 py-2 rounded-md border bg-blue-600 text-white">1</button>
                   <button className="px-3 py-2 rounded-md border hover:bg-gray-50">2</button>
                   <button className="px-3 py-2 rounded-md border hover:bg-gray-50">3</button>
                   <button className="px-3 py-2 rounded-md border hover:bg-gray-50">Next</button>
