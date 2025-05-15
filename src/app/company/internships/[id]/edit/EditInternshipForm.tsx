@@ -28,6 +28,8 @@ export default function EditInternshipForm({ internshipId }: EditInternshipFormP
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
@@ -148,6 +150,51 @@ export default function EditInternshipForm({ internshipId }: EditInternshipFormP
       setError('Failed to update internship. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    setError(null);
+
+    try {
+      const authToken = localStorage.getItem('auth_token');
+      if (!authToken) {
+        router.push('/auth/login');
+        return;
+      }
+
+      const API_URL = 'http://localhost:8001';
+      const deleteUrl = `${API_URL}/api/company/internships/${internshipId}`;
+      console.log('Deleting internship:', deleteUrl);
+      
+      const response = await fetch(deleteUrl, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error('Delete error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          url: deleteUrl
+        });
+        throw new Error(errorData?.message || 'Failed to delete internship');
+      }
+
+      router.push('/company/internships');
+    } catch (error) {
+      console.error('Error deleting internship:', error);
+      setError(error instanceof Error ? error.message : 'Failed to delete internship. Please try again.');
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -344,6 +391,13 @@ export default function EditInternshipForm({ internshipId }: EditInternshipFormP
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  Delete Internship
+                </button>
+                <button
+                  type="button"
                   onClick={() => router.back()}
                   className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
@@ -363,6 +417,37 @@ export default function EditInternshipForm({ internshipId }: EditInternshipFormP
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Delete Internship</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to delete this internship? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
+                  deleting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
