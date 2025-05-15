@@ -109,10 +109,10 @@ const InternshipCard: React.FC<{ internship: Internship }> = ({ internship }) =>
             `/auth/login?redirect=/internships/${internship.id}/apply` : 
             '#'
           }
-          className={`px-4 py-2 rounded-md text-sm font-medium ${
+          className={`px-4 py-2 rounded-md text-sm font-medium cursor-pointer ${
             internship.status === 'open'
               ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : 'bg-gray-200 text-gray-500'
           }`}
         >
           {internship.status === 'open' ? 'Apply Now' : 'Closed'}

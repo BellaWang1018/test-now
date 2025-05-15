@@ -112,7 +112,7 @@ export default function InternshipDetails({ internshipId }: InternshipDetailsPro
         {/* Back Button */}
         <Link
           href="/internships"
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
+          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6 cursor-pointer"
         >
           <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -228,10 +228,10 @@ export default function InternshipDetails({ internshipId }: InternshipDetailsPro
                 </div>
                 <Link
                   href={`/internships/${internship.id}/apply`}
-                  className={`px-6 py-3 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  className={`px-6 py-3 rounded-md text-sm font-medium transition-colors duration-200 cursor-pointer ${
                     internship.status === 'open' && !internship.application_status
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                      : 'bg-gray-200 text-gray-500'
                   }`}
                 >
                   {internship.application_status ? 'View Application' : 'Apply Now'}
