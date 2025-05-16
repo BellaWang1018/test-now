@@ -39,6 +39,19 @@ interface User {
   name?: string;
 }
 
+interface Filters {
+  search: string;
+  location: string;
+  status: string;
+  date_range: string;
+  min_salary: number | '';
+  visa: {
+    opt: boolean;
+    cpt: boolean;
+  };
+  certificate: boolean;
+}
+
 const AuthJobCard: React.FC<AuthJobCardProps> = ({ internship }) => {
   // Calculate how long ago the internship was posted
   const getTimeAgo = (dateString: string) => {
@@ -133,31 +146,32 @@ export default function StudentJobs() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  // State for internships
+  const [error, setError] = useState<string | null>(null);
   const [internships, setInternships] = useState<Internship[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  
-  // Filter states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('');
-  const [minSalary, setMinSalary] = useState<number | ''>('');
-  const [status, setStatus] = useState('');
-  const [dateRange, setDateRange] = useState('');
-  const [visaFilter, setVisaFilter] = useState<{opt: boolean, cpt: boolean}>({opt: false, cpt: false});
-  const [certificateFilter, setCertificateFilter] = useState<boolean>(false);
-  
+  const [filters, setFilters] = useState<Filters>({
+    search: '',
+    location: '',
+    status: '',
+    date_range: '',
+    min_salary: '',
+    visa: {
+      opt: false,
+      cpt: false
+    },
+    certificate: false
+  });
+
   // Initial mount effect
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
   // Authentication and data fetching effect
   useEffect(() => {
     if (!mounted) return;
-    
+
     const checkAuthAndFetchData = async () => {
       try {
         const authToken = localStorage.getItem('auth_token');
@@ -170,7 +184,6 @@ export default function StudentJobs() {
         
         const parsedUserData = JSON.parse(userData) as User;
         
-        // Check if the user is a student
         if (parsedUserData.role !== 'student') {
           router.push('/company/dashboard');
           return;
@@ -180,28 +193,36 @@ export default function StudentJobs() {
       } catch (error) {
         console.error('Authentication error:', error);
         router.push('/auth/login');
-      } finally {
-        setLoading(false);
       }
     };
 
     checkAuthAndFetchData();
   }, [mounted, router]);
 
+  // Effect for fetching data when filters or page changes
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const authToken = localStorage.getItem('auth_token');
+    if (authToken) {
+      fetchInternships(authToken);
+    }
+  }, [mounted, filters, currentPage]);
+
   const fetchInternships = async (token: string) => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Build query parameters based on filters
       const params = new URLSearchParams();
-      if (searchQuery) params.append('search', searchQuery);
-      if (location) params.append('location', location);
-      if (minSalary) params.append('salary_min', minSalary.toString());
-      if (status) params.append('status', status);
-      if (dateRange) params.append('date_range', dateRange);
-      if (visaFilter.opt) params.append('accepts_opt', 'true');
-      if (visaFilter.cpt) params.append('accepts_cpt', 'true');
-      if (certificateFilter) params.append('offers_certificate', 'true');
+      if (filters.search) params.append('search', filters.search);
+      if (filters.location) params.append('location', filters.location);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.date_range) params.append('date_range', filters.date_range);
+      if (filters.min_salary) params.append('min_salary', filters.min_salary.toString());
+      if (filters.visa.opt) params.append('accepts_opt', 'true');
+      if (filters.visa.cpt) params.append('accepts_cpt', 'true');
+      if (filters.certificate) params.append('offers_certificate', 'true');
       params.append('page', currentPage.toString());
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/student/internships?${params.toString()}`, {
@@ -218,56 +239,59 @@ export default function StudentJobs() {
       const data = await response.json();
       setInternships(data.data || []);
       setTotalPages(data.last_page);
-      setTotalItems(data.total);
     } catch (error) {
       console.error('Error fetching internships:', error);
+      setError('Failed to load internships');
     } finally {
       setLoading(false);
     }
   };
-  
-  const handleFilterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentPage(1); // Reset to first page when applying new filters
-    applyFilters();
-  };
 
-  const applyFilters = () => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      fetchInternships(token);
-    }
+  const handleFilterChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({ ...prev, [name]: value }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const handleVisaFilterChange = (type: 'opt' | 'cpt') => {
-    setVisaFilter(prev => ({
+    setFilters(prev => ({
       ...prev,
-      [type]: !prev[type]
+      visa: {
+        ...prev.visa,
+        [type]: !prev.visa[type]
+      }
     }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const handleCertificateFilterChange = () => {
-    setCertificateFilter(prev => !prev);
+    setFilters(prev => ({
+      ...prev,
+      certificate: !prev.certificate
+    }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const resetFilters = () => {
-    setSearchQuery('');
-    setLocation('');
-    setMinSalary('');
-    setStatus('');
-    setDateRange('');
-    setVisaFilter({ opt: false, cpt: false });
-    setCertificateFilter(false);
+    setFilters({
+      search: '',
+      location: '',
+      status: '',
+      date_range: '',
+      min_salary: '',
+      visa: {
+        opt: false,
+        cpt: false
+      },
+      certificate: false
+    });
     setCurrentPage(1);
-    applyFilters();
   };
 
-  if (!mounted || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg font-semibold">Loading...</div>
-      </div>
-    );
+  if (!mounted) {
+    return null;
   }
 
   return (
@@ -280,187 +304,207 @@ export default function StudentJobs() {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-4">Filters</h2>
             
-            <form onSubmit={handleFilterSubmit}>
-              {/* Search */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Search
-                </label>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Job title, company..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              
-              {/* Location */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="City, state, or remote"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
+            {/* Search */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Search
+              </label>
+              <input
+                type="text"
+                name="search"
+                value={filters.search}
+                onChange={handleFilterChange}
+                placeholder="Job title, company..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            
+            {/* Location */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={filters.location}
+                onChange={handleFilterChange}
+                placeholder="City, state, or remote"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
 
-              {/* Status */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">All Status</option>
-                  <option value="open">Open</option>
-                  <option value="closed">Closed</option>
-                  <option value="filled">Filled</option>
-                </select>
-              </div>
+            {/* Status */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Status
+              </label>
+              <select
+                name="status"
+                value={filters.status}
+                onChange={handleFilterChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">All Status</option>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+                <option value="filled">Filled</option>
+              </select>
+            </div>
 
-              {/* Date Range */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date Posted
-                </label>
-                <select
-                  value={dateRange}
-                  onChange={(e) => setDateRange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="">Any Time</option>
-                  <option value="24h">Last 24 Hours</option>
-                  <option value="7d">Last 7 Days</option>
-                  <option value="30d">Last 30 Days</option>
-                </select>
-              </div>
-              
-              {/* Minimum Salary */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Minimum Salary
-                </label>
-                <input
-                  type="number"
-                  value={minSalary}
-                  onChange={(e) => setMinSalary(e.target.value ? parseInt(e.target.value) : '')}
-                  placeholder="Enter amount"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
-              
-              {/* Visa Requirements */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Visa Requirements
-                </label>
-                <div className="space-y-2">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={visaFilter.opt}
-                      onChange={() => handleVisaFilterChange('opt')}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Accepts OPT</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={visaFilter.cpt}
-                      onChange={() => handleVisaFilterChange('cpt')}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Accepts CPT</span>
-                  </label>
-                </div>
-              </div>
-              
-              {/* Certificate */}
-              <div className="mb-6">
+            {/* Date Range */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date Posted
+              </label>
+              <select
+                name="date_range"
+                value={filters.date_range}
+                onChange={handleFilterChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">Any Time</option>
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+              </select>
+            </div>
+            
+            {/* Minimum Salary */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Minimum Salary
+              </label>
+              <input
+                type="number"
+                name="min_salary"
+                value={filters.min_salary}
+                onChange={handleFilterChange}
+                placeholder="Enter amount"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            
+            {/* Visa Requirements */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Visa Requirements
+              </label>
+              <div className="space-y-2">
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={certificateFilter}
-                    onChange={handleCertificateFilterChange}
+                    checked={filters.visa.opt}
+                    onChange={() => handleVisaFilterChange('opt')}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="ml-2 text-sm text-gray-700">Offers Certificate</span>
+                  <span className="ml-2 text-sm text-gray-700">Accepts OPT</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={filters.visa.cpt}
+                    onChange={() => handleVisaFilterChange('cpt')}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Accepts CPT</span>
                 </label>
               </div>
-              
-              {/* Filter Actions */}
-              <div className="space-y-3">
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Apply Filters
-                </button>
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                  className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Reset Filters
-                </button>
-              </div>
-            </form>
+            </div>
+            
+            {/* Certificate */}
+            <div className="mb-6">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.certificate}
+                  onChange={handleCertificateFilterChange}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">Offers Certificate</span>
+              </label>
+            </div>
+            
+            {/* Filter Actions */}
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Reset Filters
+              </button>
+            </div>
           </div>
         </div>
         
         {/* Results */}
         <div className="md:col-span-7">
-          <div className="space-y-6">
-            {internships.length > 0 ? (
-              <>
-                {internships.map((internship) => (
-                  <AuthJobCard key={internship.id} internship={internship} />
-                ))}
-                
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                  <div className="mt-8 flex justify-center">
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                      <button
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                        className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
-                          currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
-                        }`}
-                      >
-                        Previous
-                      </button>
-                      <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                        Page {currentPage} of {totalPages}
-                      </span>
-                      <button
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                          currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
-                        }`}
-                      >
-                        Next
-                      </button>
-                    </nav>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                <p className="text-gray-500">No jobs found matching your criteria.</p>
-              </div>
-            )}
-          </div>
+          {loading ? (
+            <div className="bg-white p-8 rounded-lg shadow text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading results...</p>
+            </div>
+          ) : error ? (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {internships.length > 0 ? (
+                <>
+                  {internships.map((internship) => (
+                    <AuthJobCard key={internship.id} internship={internship} />
+                  ))}
+                  
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="mt-8 flex justify-center">
+                      <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                          className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                            currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                          disabled={currentPage === totalPages}
+                          className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                            currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          Next
+                        </button>
+                      </nav>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="bg-white rounded-lg shadow-md p-6 text-center">
+                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
+                  <p className="text-gray-600 mb-4">
+                    Try adjusting your search filters to find more opportunities.
+                  </p>
+                  <button 
+                    onClick={resetFilters} 
+                    className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
