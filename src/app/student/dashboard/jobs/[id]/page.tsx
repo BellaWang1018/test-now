@@ -112,16 +112,22 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
           >
             <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to Jobs
           </button>
+          <Link
+            href={`/company/${job.company.id}`}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
+          >
+            View Company
+          </Link>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -135,7 +141,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                 href={`/student/dashboard/jobs/${job.id}/apply`}
                 className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                   job.status === 'open' && !job.application_status
-                    ? 'bg-blue-600 hover:bg-blue-700'
+                    ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
                     : 'bg-gray-400 cursor-not-allowed'
                 } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150`}
               >
