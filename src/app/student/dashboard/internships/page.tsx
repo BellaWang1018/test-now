@@ -139,7 +139,7 @@ const ResultsList: React.FC<{
 }> = ({ internships, appliedFilters, error, onReset, isLoading }) => {
   if (isLoading) {
     return (
-      <div className="col-span-10 md:col-span-7">
+      <div className="col-span-1 md:col-span-7">
         <div className="bg-white p-8 rounded-lg shadow text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading results...</p>
@@ -149,7 +149,7 @@ const ResultsList: React.FC<{
   }
 
   return (
-    <div className="col-span-10 md:col-span-7">
+    <div className="col-span-1 md:col-span-7">
       {/* Results Stats */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <p className="text-gray-600">
@@ -237,7 +237,7 @@ const FiltersSidebar: React.FC<{
   };
 
   return (
-    <form onSubmit={handleSubmit} className="col-span-10 md:col-span-3 bg-white p-5 rounded-lg shadow">
+    <div className="col-span-1 md:col-span-3 bg-white p-5 rounded-lg shadow">
       <h2 className="text-lg font-medium text-gray-900 mb-4">Filters</h2>
       
       {/* Search Query */}
@@ -307,29 +307,23 @@ const FiltersSidebar: React.FC<{
         </select>
       </div>
       
-      {/* Action Buttons */}
-      <div className="flex gap-4">
+      {/* Filter Actions */}
+      <div className="space-y-3">
         <button
           type="submit"
-          className={`flex-1 py-2 px-4 rounded-lg ${
-            isSearching
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700'
-          } text-white transition-colors`}
-          disabled={isSearching}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
         >
-          {isSearching ? 'Searching...' : 'Apply Filters'}
+          Apply Filters
         </button>
         <button
           type="button"
           onClick={onReset}
-          className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-          disabled={isSearching}
+          className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
         >
-          Reset
+          Reset Filters
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 
@@ -488,7 +482,7 @@ export default function StudentInternships() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">My Applications</h1>
       
-      <div className="grid grid-cols-10 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
         {/* Filters Sidebar */}
         <FiltersSidebar
           searchQuery={searchQuery}

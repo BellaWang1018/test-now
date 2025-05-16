@@ -274,9 +274,9 @@ export default function StudentJobs() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Job Search</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
         {/* Filters */}
-        <div className="md:col-span-1">
+        <div className="md:col-span-3">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-4">Filters</h2>
             
@@ -418,7 +418,7 @@ export default function StudentJobs() {
         </div>
         
         {/* Results */}
-        <div className="md:col-span-3">
+        <div className="md:col-span-7">
           <div className="space-y-6">
             {internships.length > 0 ? (
               <>

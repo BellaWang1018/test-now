@@ -230,9 +230,9 @@ export default function StudentInbox() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Messages</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
         {/* Conversations List */}
-        <div className="bg-white rounded-lg shadow">
+        <div className="md:col-span-3 bg-white rounded-lg shadow">
           <div className="p-4 border-b">
             <input
               type="text"
@@ -243,7 +243,7 @@ export default function StudentInbox() {
             />
           </div>
           
-          <div className="divide-y">
+          <div className="divide-y max-h-[600px] overflow-y-auto">
             {filteredConversations.length > 0 ? (
               filteredConversations.map((conversation, index) => (
                 <div
@@ -260,20 +260,20 @@ export default function StudentInbox() {
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center">
+                    <div className="flex items-center min-w-0 flex-1">
                       <img
                         src={conversation.avatar}
                         alt={conversation.name}
-                        className="w-10 h-10 rounded-full mr-3"
+                        className="w-10 h-10 rounded-full mr-3 flex-shrink-0"
                       />
-                      <div>
-                        <h3 className="font-medium">{conversation.name}</h3>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium truncate">{conversation.name}</h3>
                         <p className="text-sm text-gray-500 truncate">
                           {conversation.lastMessage}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right ml-4 flex-shrink-0">
                       <p className="text-xs text-gray-500">{conversation.timestamp}</p>
                       {conversation.unread > 0 && (
                         <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-500 text-white text-xs rounded-full">
@@ -293,7 +293,7 @@ export default function StudentInbox() {
         </div>
 
         {/* Messages Area */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-7">
           {activeConversation ? (
             <div className="bg-white rounded-lg shadow h-[600px] flex flex-col">
               {/* Messages Header */}
