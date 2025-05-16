@@ -34,12 +34,127 @@ interface Application {
   created_at: string;
 }
 
+interface DecisionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (status: Application['company_status'], notes: string) => void;
+  currentStatus: Application['company_status'];
+}
+
+function DecisionModal({ isOpen, onClose, onConfirm, currentStatus }: DecisionModalProps) {
+  const [selectedStatus, setSelectedStatus] = useState<Application['company_status']>(currentStatus);
+  const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowConfirmation(true);
+  };
+
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    await onConfirm(selectedStatus, notes);
+    setIsSubmitting(false);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-opacity-25 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
+        {!showConfirmation ? (
+          <>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Move Application to Next Step</h3>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Next Step</label>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value as Application['company_status'])}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="send interview invitation">Send Interview Invitation</option>
+                  <option value="interviewing">Interviewing</option>
+                  <option value="reviewing">Reviewing</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Decision Notes (Required)</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  rows={4}
+                  placeholder="Please provide a brief explanation for this decision..."
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  Continue
+                </button>
+              </div>
+            </form>
+          </>
+        ) : (
+          <>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Status Change</h3>
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 mb-2">Are you sure you want to move this application to:</p>
+              <p className="font-medium text-gray-900 mb-4">{selectedStatus.replace(/_/g, ' ').toUpperCase()}</p>
+              <p className="text-sm text-gray-600 mb-2">With the following notes:</p>
+              <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{notes}</p>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowConfirmation(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirm}
+                disabled={isSubmitting}
+                className={`px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isSubmitting ? 'Processing...' : 'Confirm Change'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function ApplicationDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = React.use(params);
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const [isDecisionModalOpen, setIsDecisionModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchApplicationDetails = async () => {
@@ -78,7 +193,7 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
     fetchApplicationDetails();
   }, [resolvedParams.id, router]);
 
-  const handleStatusUpdate = async (newStatus: Application['company_status']) => {
+  const handleStatusUpdate = async (newStatus: Application['company_status'], notes: string) => {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) {
@@ -89,7 +204,10 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
       const response = await axios.put(
         `${API_URL}/api/company/applications/${resolvedParams.id}/status`,
-        { company_status: newStatus },
+        { 
+          company_status: newStatus,
+          decision_notes: notes 
+        },
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -122,7 +240,6 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
           );
         } catch (error: unknown) {
           console.error('Failed to send notification message:', error);
-          // Don't throw error here as the status update was successful
         }
       }
     } catch (error: unknown) {
@@ -188,20 +305,21 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.company_status)}`}>
               {application.company_status.replace(/_/g, ' ').toUpperCase()}
             </span>
-            <select
-              value={application.company_status}
-              onChange={(e) => handleStatusUpdate(e.target.value as Application['company_status'])}
-              className="block w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            <button
+              onClick={() => setIsDecisionModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
-              <option value="pending">Pending</option>
-              <option value="send interview invitation">Send Interview Invitation</option>
-              <option value="interviewing">Interviewing</option>
-              <option value="reviewing">Reviewing</option>
-              <option value="accepted">Accepted</option>
-              <option value="rejected">Rejected</option>
-            </select>
+              Move to Next Step
+            </button>
           </div>
         </div>
+
+        <DecisionModal
+          isOpen={isDecisionModalOpen}
+          onClose={() => setIsDecisionModalOpen(false)}
+          onConfirm={handleStatusUpdate}
+          currentStatus={application.company_status}
+        />
 
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
