@@ -151,14 +151,23 @@ export default function StudentJobs() {
   
   // State for internships
   const [internships, setInternships] = useState<Internship[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   
-  // Filter states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('');
-  const [minSalary, setMinSalary] = useState<number | ''>('');
-  const [minMatch, setMinMatch] = useState<number>(0);
-  const [visaFilter, setVisaFilter] = useState<{opt: boolean, cpt: boolean}>({opt: false, cpt: false});
-  const [certificateFilter, setCertificateFilter] = useState<boolean>(false);
+  // Single filters state object
+  const [filters, setFilters] = useState({
+    search: '',
+    location: '',
+    status: '',
+    date_range: '',
+    min_salary: '',
+    visa: {
+      opt: false,
+      cpt: false
+    },
+    certificate: false
+  });
   
   // Initial mount effect
   useEffect(() => {
@@ -199,19 +208,34 @@ export default function StudentJobs() {
     checkAuthAndFetchData();
   }, [mounted, router]);
 
+  // Effect to fetch internships when filters or page changes
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      fetchInternships(token);
+    }
+  }, [mounted, filters, currentPage]);
+
   const fetchInternships = async (token: string) => {
     try {
-      setLoading(true);
+      // Only set loading state on initial load
+      if (internships.length === 0) {
+        setLoading(true);
+      }
       
       // Build query parameters based on filters
       const params = new URLSearchParams();
-      if (searchQuery) params.append('search', searchQuery);
-      if (location) params.append('location', location);
-      if (minSalary) params.append('salary_min', minSalary.toString());
-      if (visaFilter.opt) params.append('accepts_opt', 'true');
-      if (visaFilter.cpt) params.append('accepts_cpt', 'true');
-      if (certificateFilter) params.append('offers_certificate', 'true');
-      if (minMatch > 0) params.append('min_match', minMatch.toString());
+      if (filters.search) params.append('search', filters.search);
+      if (filters.location) params.append('location', filters.location);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.date_range) params.append('date_range', filters.date_range);
+      if (filters.min_salary) params.append('salary_min', filters.min_salary.toString());
+      if (filters.visa.opt) params.append('accepts_opt', 'true');
+      if (filters.visa.cpt) params.append('accepts_cpt', 'true');
+      if (filters.certificate) params.append('offers_certificate', 'true');
+      params.append('page', currentPage.toString());
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/student/internships?${params.toString()}`, {
         headers: {
@@ -226,46 +250,62 @@ export default function StudentJobs() {
       
       const data = await response.json();
       setInternships(data.data || []);
+      setTotalPages(data.last_page);
+      setTotalItems(data.total);
     } catch (error) {
       console.error('Error fetching internships:', error);
     } finally {
       setLoading(false);
     }
   };
-  
-  const handleFilterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    applyFilters();
-  };
 
-  const applyFilters = () => {
-    // Implementation of applyFilters function
+  const handleFilterChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({ ...prev, [name]: value }));
+    setCurrentPage(1);
   };
 
   const handleVisaFilterChange = (type: 'opt' | 'cpt') => {
-    setVisaFilter(prev => ({
+    setFilters(prev => ({
       ...prev,
-      [type]: !prev[type]
+      visa: {
+        ...prev.visa,
+        [type]: !prev.visa[type]
+      }
     }));
+    setCurrentPage(1);
   };
 
   const handleCertificateFilterChange = () => {
-    setCertificateFilter(prev => !prev);
+    setFilters(prev => ({
+      ...prev,
+      certificate: !prev.certificate
+    }));
+    setCurrentPage(1);
   };
 
   const resetFilters = () => {
-    setSearchQuery('');
-    setLocation('');
-    setMinSalary('');
-    setMinMatch(0);
-    setVisaFilter({ opt: false, cpt: false });
-    setCertificateFilter(false);
+    setFilters({
+      search: '',
+      location: '',
+      status: '',
+      date_range: '',
+      min_salary: '',
+      visa: {
+        opt: false,
+        cpt: false
+      },
+      certificate: false
+    });
+    setCurrentPage(1);
   };
 
   if (!mounted || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg font-semibold">Loading...</div>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -280,7 +320,7 @@ export default function StudentJobs() {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-4">Filters</h2>
             
-            <form onSubmit={handleFilterSubmit}>
+            <div>
               {/* Search */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -288,8 +328,9 @@ export default function StudentJobs() {
                 </label>
                 <input
                   type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  name="search"
+                  value={filters.search}
+                  onChange={handleFilterChange}
                   placeholder="Job title, company..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
@@ -302,11 +343,48 @@ export default function StudentJobs() {
                 </label>
                 <input
                   type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  name="location"
+                  value={filters.location}
+                  onChange={handleFilterChange}
                   placeholder="City, state, or remote"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
+              </div>
+
+              {/* Status */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  name="status"
+                  value={filters.status}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">All Status</option>
+                  <option value="open">Open</option>
+                  <option value="closed">Closed</option>
+                  <option value="filled">Filled</option>
+                </select>
+              </div>
+
+              {/* Date Range */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date Posted
+                </label>
+                <select
+                  name="date_range"
+                  value={filters.date_range}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">Any Time</option>
+                  <option value="24h">Last 24 Hours</option>
+                  <option value="7d">Last 7 Days</option>
+                  <option value="30d">Last 30 Days</option>
+                </select>
               </div>
               
               {/* Minimum Salary */}
@@ -316,27 +394,12 @@ export default function StudentJobs() {
                 </label>
                 <input
                   type="number"
-                  value={minSalary}
-                  onChange={(e) => setMinSalary(e.target.value ? parseInt(e.target.value) : '')}
+                  name="min_salary"
+                  value={filters.min_salary}
+                  onChange={handleFilterChange}
                   placeholder="Enter amount"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
-              </div>
-              
-              {/* Minimum Match Score */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Minimum Match Score
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={minMatch}
-                  onChange={(e) => setMinMatch(parseInt(e.target.value))}
-                  className="w-full"
-                />
-                <div className="text-sm text-gray-600 mt-1">{minMatch}%</div>
               </div>
               
               {/* Visa Requirements */}
@@ -348,7 +411,7 @@ export default function StudentJobs() {
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={visaFilter.opt}
+                      checked={filters.visa.opt}
                       onChange={() => handleVisaFilterChange('opt')}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
@@ -357,7 +420,7 @@ export default function StudentJobs() {
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={visaFilter.cpt}
+                      checked={filters.visa.cpt}
                       onChange={() => handleVisaFilterChange('cpt')}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
@@ -371,7 +434,7 @@ export default function StudentJobs() {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={certificateFilter}
+                    checked={filters.certificate}
                     onChange={handleCertificateFilterChange}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
@@ -379,23 +442,15 @@ export default function StudentJobs() {
                 </label>
               </div>
               
-              {/* Filter Actions */}
-              <div className="space-y-3">
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Apply Filters
-                </button>
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                  className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Reset Filters
-                </button>
-              </div>
-            </form>
+              {/* Reset Filters */}
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Reset Filters
+              </button>
+            </div>
           </div>
         </div>
         
@@ -403,9 +458,40 @@ export default function StudentJobs() {
         <div className="md:col-span-3">
           <div className="space-y-6">
             {internships.length > 0 ? (
-              internships.map((internship) => (
-                <AuthJobCard key={internship.id} internship={internship} />
-              ))
+              <>
+                {internships.map((internship) => (
+                  <AuthJobCard key={internship.id} internship={internship} />
+                ))}
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="mt-8 flex justify-center">
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                          currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        Previous
+                      </button>
+                      <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                          currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        Next
+                      </button>
+                    </nav>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="bg-white rounded-lg shadow-md p-6 text-center">
                 <p className="text-gray-500">No jobs found matching your criteria.</p>

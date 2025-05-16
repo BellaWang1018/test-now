@@ -127,6 +127,9 @@ export default function InternshipsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [internships, setInternships] = useState<Internship[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [filters, setFilters] = useState<Filters>({
     search: '',
     location: '',
@@ -160,6 +163,9 @@ export default function InternshipsPage() {
         if (filters.visa.opt) queryParams.append('accepts_opt', 'true');
         if (filters.visa.cpt) queryParams.append('accepts_cpt', 'true');
         if (filters.certificate) queryParams.append('offers_certificate', 'true');
+        
+        // Add pagination parameters
+        queryParams.append('page', currentPage.toString());
 
         const response = await fetch(`${API_URL}/api/internships?${queryParams.toString()}`);
         
@@ -167,8 +173,10 @@ export default function InternshipsPage() {
           throw new Error('Failed to fetch internships');
         }
 
-        const { data } = await response.json();
-        setInternships(data);
+        const data = await response.json();
+        setInternships(data.data);
+        setTotalPages(data.last_page);
+        setTotalItems(data.total);
       } catch (error) {
         console.error('Error fetching internships:', error);
         setError('Failed to load internships');
@@ -178,7 +186,7 @@ export default function InternshipsPage() {
     };
 
     fetchInternships();
-  }, [mounted, filters]);
+  }, [mounted, filters, currentPage]);
 
   const handleFilterChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -373,7 +381,7 @@ export default function InternshipsPage() {
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Available Internships</h1>
                 <p className="text-gray-600 mt-2">
-                  {internships.length} opportunities found
+                  {totalItems} opportunities found
                 </p>
               </div>
               <Link
@@ -403,9 +411,40 @@ export default function InternshipsPage() {
                   </p>
                 </div>
               ) : (
-                internships.map((internship) => (
-                  <InternshipCard key={internship.id} internship={internship} />
-                ))
+                <>
+                  {internships.map((internship) => (
+                    <InternshipCard key={internship.id} internship={internship} />
+                  ))}
+                  
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="mt-8 flex justify-center">
+                      <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                          className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                            currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                          disabled={currentPage === totalPages}
+                          className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                            currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          Next
+                        </button>
+                      </nav>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
