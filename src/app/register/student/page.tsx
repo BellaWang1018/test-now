@@ -70,6 +70,7 @@ export default function StudentRegistration() {
           'X-Requested-With': 'XMLHttpRequest',
         },
         credentials: 'include',
+        mode: 'cors',
         body: JSON.stringify({
           first_name: formData.firstName,
           last_name: formData.lastName,
