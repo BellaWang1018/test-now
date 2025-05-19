@@ -229,15 +229,13 @@ const FiltersSidebar: React.FC<{
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isSearching) {
-      onApply();
-    }
-  };
-
   return (
-    <div className="col-span-1 md:col-span-3 bg-white p-5 rounded-lg shadow">
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      if (!isSearching) {
+        onApply();
+      }
+    }} className="col-span-10 md:col-span-3 bg-white p-5 rounded-lg shadow">
       <h2 className="text-lg font-medium text-gray-900 mb-4">Filters</h2>
       
       {/* Search Query */}
@@ -323,7 +321,7 @@ const FiltersSidebar: React.FC<{
           Reset Filters
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 
