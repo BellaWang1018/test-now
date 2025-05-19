@@ -51,6 +51,17 @@ export default function StudentRegistration() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+      console.log('Sending registration request to:', `${API_URL}/api/auth/register/student`);
+      console.log('Request payload:', {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        university: formData.university,
+        major: formData.major,
+        graduationYear: parseInt(formData.graduationYear),
+      });
+
       const response = await fetch(`${API_URL}/api/auth/register/student`, {
         method: 'POST',
         headers: {
@@ -68,7 +79,9 @@ export default function StudentRegistration() {
         }),
       });
 
+      console.log('Response status:', response.status);
       const responseData = await response.json() as ApiError;
+      console.log('Response data:', responseData);
       
       if (!response.ok) {
         if (responseData.errors) {
