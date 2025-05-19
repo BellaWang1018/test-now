@@ -67,7 +67,9 @@ export default function StudentRegistration() {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
         },
+        credentials: 'include',
         body: JSON.stringify({
           first_name: formData.firstName,
           last_name: formData.lastName,
