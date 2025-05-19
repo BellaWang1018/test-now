@@ -68,7 +68,9 @@ export default function StudentRegistration() {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'X-Requested-With': 'XMLHttpRequest',
+          'Origin': window.location.origin,
         },
+        mode: 'cors',
         credentials: 'include',
         body: JSON.stringify({
           first_name: formData.firstName,
