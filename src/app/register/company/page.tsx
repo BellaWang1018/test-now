@@ -55,17 +55,15 @@ export default function CompanyRegistration() {
           'Accept': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.companyName,
+          company_name: formData.companyName,
           email: formData.email,
           password: formData.password,
-          role: 'company',
-          company_name: formData.companyName,
-          company_legal_name: formData.legalName,
-          company_website: formData.website,
-          company_description: formData.description,
-          company_industry: formData.industry,
+          industry: formData.industry,
+          description: formData.description,
+          website: formData.website || null,
           company_size: formData.companySize,
-          company_work_email: formData.workEmail,
+          work_email: formData.workEmail,
+          legal_name: formData.legalName,
         }),
       });
 
