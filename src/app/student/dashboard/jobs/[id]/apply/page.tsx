@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Job {
   id: number;
@@ -33,7 +34,7 @@ interface StudentProfile {
   university: string;
   major: string;
   graduation_year: number;
-  resume_path: string;
+  resume_path: string | null;
 }
 
 export default function ApplyJobPage({ params }: { params: Promise<{ id: string }> }) {
@@ -46,7 +47,7 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     cover_letter: '',
-    resume_path: '',
+    resume: null as File | null,
     portfolio_url: '',
   });
 
@@ -116,7 +117,7 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setError(null); // Clear any previous errors
+    setError(null);
 
     try {
       const token = localStorage.getItem('auth_token');
@@ -129,18 +130,23 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
         throw new Error('Please complete your profile before applying');
       }
 
+      // Create FormData to handle file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('cover_letter', formData.cover_letter);
+      if (formData.resume) {
+        formDataToSend.append('resume', formData.resume);
+      }
+      formDataToSend.append('portfolio_url', formData.portfolio_url);
+      formDataToSend.append('student_profiles_id', studentProfile.id.toString());
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/student/internships/${resolvedParams.id}/apply`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({
-            ...formData,
-            student_profiles_id: studentProfile.id
-          })
+          body: formDataToSend
         }
       );
 
@@ -166,7 +172,7 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
         }
       }
 
-      router.push('/student/dashboard/internships');
+      router.push('/student/dashboard/jobs');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again later';
       setError(errorMessage);
@@ -181,6 +187,15 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData(prev => ({
+        ...prev,
+        resume: e.target.files![0]
+      }));
+    }
   };
 
   if (loading) {
@@ -291,6 +306,29 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
               </div>
 
               <div>
+                <label htmlFor="resume" className="block text-sm font-medium text-gray-700 mb-2">
+                  Resume (PDF, DOC, DOCX)
+                </label>
+                <input
+                  type="file"
+                  id="resume"
+                  name="resume"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileChange}
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-indigo-50 file:text-indigo-700
+                    hover:file:bg-indigo-100"
+                  required
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  Maximum file size: 2MB. Accepted formats: PDF, DOC, DOCX
+                </p>
+              </div>
+
+              <div>
                 <label htmlFor="portfolio_url" className="block text-sm font-medium text-gray-700 mb-2">
                   Portfolio URL (Optional)
                 </label>
@@ -309,12 +347,19 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
                 <div className="text-red-600 text-sm">{error}</div>
               )}
 
-              <div className="flex justify-end">
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer ${
-                    submitting ? 'opacity-50' : ''
+                  className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 ${
+                    submitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
                   {submitting ? 'Submitting...' : 'Submit Application'}

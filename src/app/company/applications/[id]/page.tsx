@@ -391,9 +391,9 @@ export default function ApplicationDetailsPage({ params }: { params: Promise<{ i
             )}
 
             <div className="flex space-x-4">
-              {application?.student?.resume_path && (
+              {application?.application?.resume_path && (
                 <a
-                  href={application.student.resume_path}
+                  href={`${process.env.NEXT_PUBLIC_API_URL}/storage/${application.application.resume_path}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
