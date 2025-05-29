@@ -41,6 +41,8 @@ export default function CompanyInternships() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [internshipToDelete, setInternshipToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -116,15 +118,20 @@ export default function CompanyInternships() {
     }
   };
 
-  const handleDeleteInternship = async (internshipId: string) => {
-    if (!confirm('Are you sure you want to delete this internship posting?')) return;
+  const handleDeleteClick = (internshipId: string) => {
+    setInternshipToDelete(internshipId);
+    setShowDeletePopup(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!internshipToDelete) return;
     
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) return;
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
-      const response = await fetch(`${API_URL}/api/company/internships/${internshipId}`, {
+      const response = await fetch(`${API_URL}/api/company/internships/${internshipToDelete}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -138,7 +145,7 @@ export default function CompanyInternships() {
       }
 
       setInternships(prevInternships => 
-        prevInternships.filter(internship => internship.id !== internshipId)
+        prevInternships.filter(internship => internship.id !== internshipToDelete)
       );
       
       if (internships.length === 1 && currentPage > 1) {
@@ -148,6 +155,9 @@ export default function CompanyInternships() {
       }
     } catch (error) {
       console.error('Error deleting internship:', error);
+    } finally {
+      setShowDeletePopup(false);
+      setInternshipToDelete(null);
     }
   };
 
@@ -312,7 +322,7 @@ export default function CompanyInternships() {
                             View and Edit
                           </Link>
                           <button
-                            onClick={() => handleDeleteInternship(internship.id)}
+                            onClick={() => handleDeleteClick(internship.id)}
                             className="text-red-600 hover:text-red-900"
                           >
                             Delete
@@ -434,6 +444,35 @@ export default function CompanyInternships() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Popup */}
+      {showDeletePopup && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-lg">
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Delete Internship</h3>
+              <p className="text-sm text-gray-500 mb-4">Are you sure you want to delete this internship posting?</p>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeletePopup(false);
+                  setInternshipToDelete(null);
+                }}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
