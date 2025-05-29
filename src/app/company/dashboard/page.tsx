@@ -104,14 +104,7 @@ export default function CompanyDashboard() {
         // Handle both array and object with data property formats
         const internships = Array.isArray(internshipsData) ? internshipsData : (internshipsData.data || []);
 
-        setStats({
-          total_internships: internships.length,
-          active_internships: internships.filter((i: InternshipData) => i.is_active || i.status === 'open').length,
-          total_applications: internships.reduce((acc: number, i: InternshipData) => acc + (i.application_count || 0), 0),
-          new_applications: 0 // Placeholder, adjust as needed
-        });
-
-        // Fetch company applications
+        // Fetch applications count
         const applicationsResponse = await fetch(`${API_URL}/api/company/applications`, {
           headers: {
             'Authorization': `Bearer ${authToken}`,
@@ -121,11 +114,25 @@ export default function CompanyDashboard() {
         });
 
         if (!applicationsResponse.ok) {
-          throw new Error('Failed to fetch company applications');
+          throw new Error('Failed to fetch applications');
         }
 
         const applicationsData = await applicationsResponse.json();
-        setRecentApplications(applicationsData.data || []);
+        const applications = applicationsData.data || [];
+
+        setStats({
+          total_internships: internships.length,
+          active_internships: internships.filter((i: InternshipData) => i.is_active || i.status === 'open').length,
+          total_applications: applications.length,
+          new_applications: applications.filter((app: any) => {
+            const createdAt = new Date(app.created_at);
+            const now = new Date();
+            const diffInHours = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+            return diffInHours <= 24;
+          }).length
+        });
+
+        setRecentApplications(applications.slice(0, 5));
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setError('Failed to load dashboard data');
