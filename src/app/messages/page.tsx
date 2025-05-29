@@ -245,8 +245,8 @@ export default function MessageInbox() {
                     }}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="relative w-10 h-10 mr-3">
+                      <div className="flex items-center min-w-0 flex-1">
+                        <div className="relative w-10 h-10 mr-3 flex-shrink-0">
                           <Image
                             src={conversation.avatar}
                             alt={conversation.name}
@@ -254,12 +254,12 @@ export default function MessageInbox() {
                             className="rounded-full object-cover"
                           />
                         </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900">{conversation.name}</h3>
-                          <p className="text-sm text-gray-500">{conversation.lastMessage}</p>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-gray-900 truncate">{conversation.name}</h3>
+                          <p className="text-sm text-gray-500 truncate">{conversation.lastMessage}</p>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right ml-4 flex-shrink-0">
                         <span className="text-sm text-gray-500">{conversation.timestamp}</span>
                         {conversation.unread > 0 && (
                           <span className="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
