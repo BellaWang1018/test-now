@@ -30,7 +30,7 @@ export default function CompanyDetailsPage({ params }: { params: Promise<{ id: s
     const fetchCompanyDetails = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
-        const response = await axios.get(`${API_URL}/api/company/${resolvedParams.id}`, {
+        const response = await axios.get(`${API_URL}/api/companies/${resolvedParams.id}`, {
           headers: {
             'Accept': 'application/json'
           }
