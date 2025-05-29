@@ -91,7 +91,7 @@ export default function CompanyInternships() {
       if (!token) return;
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
-      const response = await fetch(`${API_URL}/api/internships/${internshipId}`, {
+      const response = await fetch(`${API_URL}/api/company/internships/${internshipId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
