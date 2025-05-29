@@ -153,7 +153,7 @@ export default function StudentJobs() {
   const [filters, setFilters] = useState<Filters>({
     search: '',
     location: '',
-    status: '',
+    status: 'open',
     date_range: '',
     min_salary: '',
     visa: {
@@ -278,7 +278,7 @@ export default function StudentJobs() {
     setFilters({
       search: '',
       location: '',
-      status: '',
+      status: 'open',
       date_range: '',
       min_salary: '',
       visa: {
