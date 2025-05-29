@@ -244,7 +244,7 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150 cursor-pointer"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150"
           >
             <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -254,15 +254,40 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-100">
+          <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-blue-50">
             <h1 className="text-2xl font-bold text-gray-900">Apply for {job.title}</h1>
             <p className="mt-1 text-lg text-gray-600">{job.company.name}</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded-full border border-gray-200">
+                {job.location}
+              </span>
+              {job.accepts_opt && (
+                <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full border border-green-200">
+                  Accepts OPT
+                </span>
+              )}
+              {job.accepts_cpt && (
+                <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full border border-green-200">
+                  Accepts CPT
+                </span>
+              )}
+              {job.offers_certificate && (
+                <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200">
+                  Offers Certificate
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="px-6 py-5">
             {/* Student Profile Info */}
-            <div className="bg-gray-50 rounded-lg p-6 mb-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Profile</h2>
+            <div className="bg-gray-50 rounded-lg p-6 mb-8 border border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg className="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Your Profile
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-gray-500">Name</p>
@@ -299,33 +324,44 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
                   rows={6}
                   value={formData.cover_letter}
                   onChange={handleInputChange}
-                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  placeholder="Write your cover letter here..."
+                  className="block w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 resize-none"
+                  placeholder="Write your cover letter here. Explain why you are interested in this position and how your skills align with the requirements..."
                   required
                 />
+                <p className="mt-1 text-sm text-gray-500">
+                  Your cover letter should highlight your relevant experience and explain why you are a good fit for this position.
+                </p>
               </div>
 
               <div>
                 <label htmlFor="resume" className="block text-sm font-medium text-gray-700 mb-2">
-                  Resume (PDF, DOC, DOCX)
+                  Resume
                 </label>
-                <input
-                  type="file"
-                  id="resume"
-                  name="resume"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileChange}
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-indigo-50 file:text-indigo-700
-                    hover:file:bg-indigo-100"
-                  required
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Maximum file size: 2MB. Accepted formats: PDF, DOC, DOCX
-                </p>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                  <div className="space-y-1 text-center">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div className="flex text-sm text-gray-600">
+                      <label htmlFor="resume" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                        <span>Upload a file</span>
+                        <input
+                          id="resume"
+                          name="resume"
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleFileChange}
+                          className="sr-only"
+                          required
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      PDF, DOC, or DOCX up to 2MB
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -338,31 +374,55 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
                   name="portfolio_url"
                   value={formData.portfolio_url}
                   onChange={handleInputChange}
-                  className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                  className="block w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                   placeholder="https://your-portfolio.com"
                 />
+                <p className="mt-1 text-sm text-gray-500">
+                  Share your portfolio, GitHub, or any other relevant links to showcase your work.
+                </p>
               </div>
 
               {error && (
-                <div className="text-red-600 text-sm">{error}</div>
+                <div className="rounded-md bg-red-50 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-700">{error}</p>
+                    </div>
+                  </div>
+                </div>
               )}
 
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 ${
+                  className={`px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                     submitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
-                  {submitting ? 'Submitting...' : 'Submit Application'}
+                  {submitting ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Submitting...
+                    </span>
+                  ) : (
+                    'Submit Application'
+                  )}
                 </button>
               </div>
             </form>

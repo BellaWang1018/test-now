@@ -115,7 +115,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
         <div className="mb-8 flex items-center justify-between">
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150"
           >
             <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -124,18 +124,41 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
           </button>
           <Link
             href={`/company/${job.company.id}`}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150"
           >
+            <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
             View Company
           </Link>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-100">
+          <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-blue-50">
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{job.title}</h1>
                 <p className="mt-1 text-lg text-gray-600">{job.company.name}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded-full border border-gray-200">
+                    {job.location}
+                  </span>
+                  {job.accepts_opt && (
+                    <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full border border-green-200">
+                      Accepts OPT
+                    </span>
+                  )}
+                  {job.accepts_cpt && (
+                    <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full border border-green-200">
+                      Accepts CPT
+                    </span>
+                  )}
+                  {job.offers_certificate && (
+                    <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200">
+                      Offers Certificate
+                    </span>
+                  )}
+                </div>
               </div>
               <Link
                 href={`/student/dashboard/jobs/${job.id}/apply`}
@@ -143,7 +166,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                   job.status === 'open' && !job.application_status
                     ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
                     : 'bg-gray-400 cursor-not-allowed'
-                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150`}
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150`}
               >
                 {job.application_status ? 'View Application' : 'Apply Now'}
               </Link>
@@ -152,32 +175,58 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
 
           <div className="px-6 py-5 space-y-6">
             {/* Key Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 rounded-lg p-6 border border-gray-100">
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Location</h3>
+                <h3 className="text-sm font-medium text-gray-500 flex items-center">
+                  <svg className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Location
+                </h3>
                 <p className="mt-1 text-sm text-gray-900">{job.location}</p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Salary Range</h3>
+                <h3 className="text-sm font-medium text-gray-500 flex items-center">
+                  <svg className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Salary Range
+                </h3>
                 <p className="mt-1 text-sm text-gray-900">
                   ${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()}
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Application Deadline</h3>
+                <h3 className="text-sm font-medium text-gray-500 flex items-center">
+                  <svg className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Application Deadline
+                </h3>
                 <p className="mt-1 text-sm text-gray-900">
                   {new Date(job.application_deadline).toLocaleDateString()}
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Status</h3>
+                <h3 className="text-sm font-medium text-gray-500 flex items-center">
+                  <svg className="h-4 w-4 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Status
+                </h3>
                 <p className="mt-1 text-sm text-gray-900 capitalize">{job.status}</p>
               </div>
             </div>
 
             {/* Requirements */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Requirements</h3>
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                <svg className="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Requirements
+              </h3>
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <svg className={`h-5 w-5 ${job.accepts_opt ? 'text-green-500' : 'text-red-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,22 +250,36 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Description */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Description</h3>
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                <svg className="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+                Description
+              </h3>
               <div className="prose prose-sm max-w-none text-gray-600">
                 {job.description.split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-4">{paragraph}</p>
+                  <p key={index} className="mb-4 last:mb-0">
+                    {paragraph}
+                  </p>
                 ))}
               </div>
             </div>
 
             {/* Hard Requirements */}
             {job.hard_requirements && (
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Hard Requirements</h3>
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-100">
+                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                  <svg className="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Hard Requirements
+                </h3>
                 <div className="prose prose-sm max-w-none text-gray-600">
                   {job.hard_requirements.split('\n').map((requirement, index) => (
-                    <p key={index} className="mb-2">{requirement}</p>
+                    <p key={index} className="mb-4 last:mb-0">
+                      {requirement}
+                    </p>
                   ))}
                 </div>
               </div>
