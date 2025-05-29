@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 interface Job {
   id: number;
@@ -37,6 +36,12 @@ interface StudentProfile {
   resume_path: string | null;
 }
 
+interface FormData {
+  cover_letter: string;
+  resume: File | null;
+  portfolio_url: string;
+}
+
 export default function ApplyJobPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = React.use(params);
   const router = useRouter();
@@ -45,9 +50,9 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     cover_letter: '',
-    resume: null as File | null,
+    resume: null,
     portfolio_url: '',
   });
 
@@ -99,10 +104,6 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
           throw new Error('Student profile not found. Please complete your profile first.');
         }
         setStudentProfile(profileData.profile);
-        setFormData(prev => ({
-          ...prev,
-          resume_path: profileData.profile.resume_path || ''
-        }));
 
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -137,7 +138,6 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
         formDataToSend.append('resume', formData.resume);
       }
       formDataToSend.append('portfolio_url', formData.portfolio_url);
-      formDataToSend.append('student_profiles_id', studentProfile.id.toString());
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/student/internships/${resolvedParams.id}/apply`,

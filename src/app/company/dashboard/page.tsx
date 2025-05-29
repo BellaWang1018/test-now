@@ -13,6 +13,22 @@ interface CompanyUser {
   updated_at: string;
 }
 
+interface Application {
+  id: string;
+  student: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+  internship: {
+    id: string;
+    title: string;
+  };
+  status: 'pending' | 'reviewing' | 'interview' | 'accepted' | 'rejected';
+  created_at: string;
+}
+
 interface DashboardStats {
   total_internships: number;
   active_internships: number;
@@ -118,13 +134,13 @@ export default function CompanyDashboard() {
         }
 
         const applicationsData = await applicationsResponse.json();
-        const applications = applicationsData.data || [];
+        const applications: Application[] = applicationsData.data || [];
 
         setStats({
           total_internships: internships.length,
           active_internships: internships.filter((i: InternshipData) => i.is_active || i.status === 'open').length,
           total_applications: applications.length,
-          new_applications: applications.filter((app: any) => {
+          new_applications: applications.filter((app: Application) => {
             const createdAt = new Date(app.created_at);
             const now = new Date();
             const diffInHours = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
@@ -132,7 +148,16 @@ export default function CompanyDashboard() {
           }).length
         });
 
-        setRecentApplications(applications.slice(0, 5));
+        // Transform applications to match RecentApplication interface
+        const recentApps: RecentApplication[] = applications.slice(0, 5).map(app => ({
+          id: app.id,
+          student: app.student,
+          internship: app.internship,
+          status: app.status,
+          applied_at: app.created_at
+        }));
+
+        setRecentApplications(recentApps);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setError('Failed to load dashboard data');
