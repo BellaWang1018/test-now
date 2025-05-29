@@ -159,7 +159,7 @@ export default function InternshipsPage() {
         if (filters.location) queryParams.append('location', filters.location);
         if (filters.status) queryParams.append('status', filters.status);
         if (filters.date_range) queryParams.append('date_range', filters.date_range);
-        if (filters.min_salary) queryParams.append('min_salary', filters.min_salary.toString());
+        if (filters.min_salary) queryParams.append('salary_min', filters.min_salary.toString());
         if (filters.visa.opt) queryParams.append('accepts_opt', 'true');
         if (filters.visa.cpt) queryParams.append('accepts_cpt', 'true');
         if (filters.certificate) queryParams.append('offers_certificate', 'true');

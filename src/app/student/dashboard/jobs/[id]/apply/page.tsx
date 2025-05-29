@@ -116,6 +116,7 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setError(null); // Clear any previous errors
 
     try {
       const token = localStorage.getItem('auth_token');
@@ -125,7 +126,7 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
       }
 
       if (!studentProfile) {
-        throw new Error('Student profile not found');
+        throw new Error('Please complete your profile before applying');
       }
 
       const response = await fetch(
@@ -144,12 +145,31 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
       );
 
       if (!response.ok) {
-        throw new Error('Failed to submit application');
+        const errorData = await response.json().catch(() => null);
+        if (errorData?.message) {
+          throw new Error(errorData.message);
+        }
+        
+        switch (response.status) {
+          case 400:
+            throw new Error('Please check your application details and try again');
+          case 401:
+            throw new Error('Your session has expired. Please log in again');
+          case 403:
+            throw new Error('You are not authorized to apply for this position');
+          case 404:
+            throw new Error('This job posting is no longer available');
+          case 409:
+            throw new Error('You have already applied for this position');
+          default:
+            throw new Error('Unable to submit your application. Please try again later');
+        }
       }
 
       router.push('/student/dashboard/internships');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit application');
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again later';
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -174,7 +194,31 @@ export default function ApplyJobPage({ params }: { params: Promise<{ id: string 
   if (error || !job || !studentProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-red-500">{error || 'Job not found'}</div>
+        <div className="max-w-md w-full mx-auto p-6">
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <div className="mb-4">
+              <svg className="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Application Error</h3>
+            <p className="text-gray-600 mb-6">{error || 'Job not found'}</p>
+            <div className="space-y-3">
+              <button
+                onClick={() => router.back()}
+                className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
